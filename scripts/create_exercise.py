@@ -13,7 +13,7 @@ import json
 
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / 'templates' / 'exercise-template.html'
-OUT_DIR = ROOT / 'exercises'
+OUT_DIR = ROOT / 'exercices'
 
 parser = argparse.ArgumentParser(description='Générateur d\'exercice à partir du template')
 parser.add_argument('--slug', required=True, help='identifiant/nom de fichier (sans extension)')

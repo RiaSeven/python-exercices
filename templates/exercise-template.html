@@ -8,7 +8,6 @@
   <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js"></script>
   <style>
-    /* Styles minimaux — reprenez ceux de index.html */
     body {
       font-family: sans-serif;
       max-width: 900px;
@@ -24,6 +23,18 @@
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
+    h1 {
+      color: #333;
+    }
+
+    .consigne {
+      background: #e7f3fe;
+      border-left: 5px solid #2196F3;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+
+    /* Style de l'éditeur */
     #editor {
       height: 300px;
       width: 100%;
@@ -32,6 +43,35 @@
       font-size: 16px;
     }
 
+    .controls {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .btn-run {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .btn-run:hover {
+      background-color: #45a049;
+    }
+
+    .btn-reset {
+      background-color: #f44336;
+      color: white;
+    }
+
+    /* Zone de sortie (console) */
     #output {
       background: #2d2d2d;
       color: #f8f8f2;
@@ -43,11 +83,21 @@
       min-height: 50px;
     }
 
-    .consigne {
-      background: #e7f3fe;
-      border-left: 5px solid #2196F3;
-      padding: 10px;
-      margin-bottom: 15px;
+    .loading {
+      color: #888;
+      font-style: italic;
+    }
+
+    .success {
+      color: #4CAF50;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .error {
+      color: #ff5555;
+      font-weight: bold;
+      margin-top: 10px;
     }
   </style>
 </head>
