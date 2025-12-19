@@ -54,6 +54,7 @@ python scripts/create_exercise.py \
 ```
 
   - Le script génère `exercises/<slug>.html` en remplaçant automatiquement les placeholders.
+  - Exemple concret fourni : `exercises/boucle-while.html` (généré via `scripts/create_exercise.py`).
   - Si vous modifiez la structure du template, mettez à jour le script ou adaptez `{{EXPECTED_LINES}}` au format JSON attendu par `checkResult()`.
 
 ## Règles pour les agents AI (comportements attendus)

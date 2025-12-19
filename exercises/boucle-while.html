@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Boucle While</title>
+  <!-- Utilise Pyodide (CDN) et Ace (CDN). Ne changez ces URLs que si vous testez localement. -->
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js"></script>
+  <style>
+    /* Styles minimaux — reprenez ceux de index.html */
+    body {
+      font-family: sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background: #f4f4f9;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    #editor {
+      height: 300px;
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    #output {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      min-height: 50px;
+    }
+
+    .consigne {
+      background: #e7f3fe;
+      border-left: 5px solid #2196F3;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Boucle While</h1>
+
+    <div class="consigne">
+      Objectif : afficher 0,2,4,6,8,10 (un par ligne)
+    </div>
+
+    <!-- Placez ici le code initial pour l'exercice. Le script de génération insérera le contenu de --code-file ou --code. -->
+    <div id="editor">n = 0
+while n < 10: print(n) n=n + 1
+</div>
+
+    <div class="controls">
+      <button class="btn-run" onclick="runCode()" id="runBtn" disabled>Exécuter le code</button>
+      <button class="btn-reset" onclick="resetCode()">Réinitialiser</button>
+    </div>
+
+    <h3>Sortie du programme :</h3>
+    <div id="output">Chargement de Python en cours...</div>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    // Setup Ace
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/chrome");
+    editor.session.setMode("ace/mode/python");
+
+    let pyodide;
+    const outputDiv = document.getElementById("output");
+    const runBtn = document.getElementById("runBtn");
+    const statusDiv = document.getElementById("status");
+
+    const initialCode = editor.getValue();
+
+    async function main() {
+      pyodide = await loadPyodide();
+      outputDiv.innerText = "Python est prêt ! Vous pouvez exécuter le code.";
+      runBtn.disabled = false;
+    }
+    main();
+
+    async function runCode() {
+      outputDiv.innerText = "";
+      statusDiv.innerText = "";
+
+      let code = editor.getValue();
+
+      pyodide.setStdout({ batched: (msg) => outputDiv.innerText += msg + "\n" });
+
+      try {
+        await pyodide.runPythonAsync(code);
+        checkResult(outputDiv.innerText);
+      } catch (err) {
+        outputDiv.innerText += "\nErreur :\n" + err;
+      }
+    }
+
+    // Expected lines to validate — la génération remplace ["0", "2", "4", "6", "8", "10"] par un JSON array, ex: ["0","2","4"]
+    const EXPECTED_LINES = ["0", "2", "4", "6", "8", "10"];
+
+    function checkResult(output) {
+      let lines = output.trim().split('\n').filter(l => l.trim().length > 0);
+
+      let isCorrect = lines.length === EXPECTED_LINES.length &&
+        lines.every((val, index) => val.trim() === EXPECTED_LINES[index]);
+
+      if (isCorrect) {
+        statusDiv.innerHTML = "<div class='success'>✅ Bravo ! Exercice validé.</div>";
+      } else {
+        statusDiv.innerHTML = "<div class='error'>❌ Ce n'est pas encore ça. Vérifiez votre code et la sortie attendue.</div>";
+      }
+    }
+
+    function resetCode() { editor.setValue(initialCode); }
+  </script>
+</body>
+
+</html>

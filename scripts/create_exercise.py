@@ -44,11 +44,13 @@ expected_json = json.dumps(expected_list)
 out = OUT_DIR
 out.mkdir(parents=True, exist_ok=True)
 
-content = TEMPLATE.read_text()
+content = TEMPLATE.read_text(encoding='utf-8')
 content = content.replace('{{TITLE}}', args.title)
 content = content.replace('{{DESCRIPTION}}', args.description)
 content = content.replace('{{INITIAL_CODE}}', code)
+# Replace expected placeholder (support with or without spaces)
 content = content.replace('{{EXPECTED_LINES}}', expected_json)
+content = content.replace('{{ EXPECTED_LINES }}', expected_json)
 
 out_file = out / f"{args.slug}.html"
 out_file.write_text(content, encoding='utf-8')
