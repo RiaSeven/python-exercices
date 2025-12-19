@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Exercices Python Interactifs</title>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+      background: #f4f4f9;
+    }
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    .consigne {
+      background: #e7f3fe;
+      border-left: 5px solid #2196F3;
+      padding: 10px;
+      margin-bottom: 15px;
+    }
+
+    /* Style de l'éditeur */
+    #editor {
+      height: 300px;
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
+    .controls {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      cursor: pointer;
+      border: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+
+    .btn-run {
+      background-color: #4CAF50;
+      color: white;
+    }
+
+    .btn-run:hover {
+      background-color: #45a049;
+    }
+
+    .btn-reset {
+      background-color: #f44336;
+      color: white;
+    }
+
+    /* Zone de sortie (console) */
+    #output {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      min-height: 50px;
+    }
+
+    .loading {
+      color: #888;
+      font-style: italic;
+    }
+
+    .success {
+      color: #4CAF50;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .error {
+      color: #ff5555;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>Exercice : Boucle While</h1>
+
+    <div class="consigne">
+      <p><strong>Objectif :</strong> Le programme suivant doit afficher les entiers de 0 à 10 (inclus) de 2 en 2.</p>
+      <p>Résultat attendu : <code>0, 2, 4, 6, 8, 10</code> (un par ligne).</p>
+      <p>Corrigez le code ci-dessous.</p>
+    </div>
+
+    <div id="editor">n = 0
+      while n < 10: print(n) n=n + 1</div>
+
+        <div class="controls">
+          <button class="btn-run" onclick="runCode()" id="runBtn" disabled>Exécuter le code</button>
+          <button class="btn-reset" onclick="resetCode()">Réinitialiser</button>
+        </div>
+
+        <h3>Sortie du programme :</h3>
+        <div id="output">Chargement de Python en cours...</div>
+        <div id="status"></div>
+    </div>
+
+    <script>
+      // 1. Initialisation de l'éditeur Ace
+      var editor = ace.edit("editor");
+      editor.setTheme("ace/theme/chrome");
+      editor.session.setMode("ace/mode/python");
+
+      let pyodide;
+      const outputDiv = document.getElementById("output");
+      const runBtn = document.getElementById("runBtn");
+      const statusDiv = document.getElementById("status");
+
+      // Code initial pour le reset
+      const initialCode = editor.getValue();
+
+      // 2. Chargement de Pyodide
+      async function main() {
+        pyodide = await loadPyodide();
+        outputDiv.innerText = "Python est prêt ! Vous pouvez exécuter le code.";
+        runBtn.disabled = false;
+        runBtn.innerText = "Exécuter le code";
+      }
+      main();
+
+      // 3. Fonction pour exécuter le code
+      async function runCode() {
+        // Réinitialiser l'affichage
+        outputDiv.innerText = "";
+        statusDiv.innerText = "";
+
+        // Récupérer le code de l'éditeur
+        let code = editor.getValue();
+
+        // Rediriger print() vers notre div HTML au lieu de la console
+        // On capture stdout
+        pyodide.setStdout({ batched: (msg) => outputDiv.innerText += msg + "\n" });
+
+        try {
+          // Exécution du code
+          await pyodide.runPythonAsync(code);
+
+          // 4. Vérification simple du résultat (Validation)
+          checkResult(outputDiv.innerText);
+
+        } catch (err) {
+          outputDiv.innerText += "\nErreur :\n" + err;
+        }
+      }
+
+      // Fonction de validation personnalisée pour l'exercice
+      function checkResult(output) {
+        // On nettoie la sortie (trim) et on découpe par ligne
+        let lines = output.trim().split('\n');
+
+        // Le résultat attendu : 0, 2, 4, 6, 8, 10
+        let expected = ["0", "2", "4", "6", "8", "10"];
+
+        // Comparaison basique (tableaux identiques ?)
+        let isCorrect = lines.length === expected.length &&
+          lines.every((val, index) => val.trim() === expected[index]);
+
+        if (isCorrect) {
+          statusDiv.innerHTML = "<div class='success'>✅ Bravo ! Exercice validé.</div>";
+        } else {
+          statusDiv.innerHTML = "<div class='error'>❌ Ce n'est pas encore ça. Vérifiez votre boucle et le pas d'incrémentation.</div>";
+        }
+      }
+
+      function resetCode() {
+        editor.setValue(initialCode);
+      }
+    </script>
+
+</body>
+
+</html>
