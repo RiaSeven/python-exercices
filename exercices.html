@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exercices Python Interactifs - LearnPython</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js"></script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@600;700&display=swap"
+    rel="stylesheet">
+
+  <script>
+    window.MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']], // Détecte $...$ comme des maths
+      },
+      svg: {
+        fontCache: 'global'
+      }
+    };
+  </script>
+  <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+  <style>
+    /* Thème sombre moderne */
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0F172A;
+      color: #F8FAFC;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* --- LOGO & MARQUE --- */
+    .brand-text {
+      font-family: 'Poppins', sans-serif;
+      font-size: 2.2rem;
+      /* Beaucoup plus gros */
+      font-weight: 900;
+      /* Extra gras */
+      letter-spacing: -1px;
+      /* Lettres plus serrées pour l'impact */
+
+      /* Effet Dégradé sur le texte */
+      background: linear-gradient(to right, #fff 0%, #22D3EE 50%, #7F5AF0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+
+      /* Petit halo lumineux */
+      filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.3));
+    }
+
+    /* Animation du logo Python IA */
+    .logo-tech {
+      width: 50px;
+      height: 50px;
+      filter: drop-shadow(0 0 8px rgba(127, 90, 240, 0.6));
+      /* Lueur violette */
+      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .logo-container:hover .logo-tech {
+      transform: scale(1.1) rotate(10deg);
+      /* Petit effet au survol */
+    }
+
+    /* Arrière-plan animé */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: linear-gradient(120deg, #7F5AF0, #22D3EE, #7F5AF0);
+      background-size: 600% 600%;
+      animation: gradient 20s ease infinite;
+      opacity: 0.15;
+    }
+
+    @keyframes gradient {
+      0% {
+        background-position: 0% 50%
+      }
+
+      50% {
+        background-position: 100% 50%
+      }
+
+      100% {
+        background-position: 0% 50%
+      }
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 40px auto;
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .content {
+      padding: 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .consigne-box {
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 5px solid #7F5AF0;
+      padding: 20px;
+      border-radius: 4px;
+      font-size: 1.05rem;
+      line-height: 1.6;
+    }
+
+    .consigne-box h2 {
+      margin-top: 0;
+      color: #22D3EE;
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    /* Style spécifique pour le code dans les consignes */
+    code {
+      background: rgba(34, 211, 238, 0.15);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      color: #22D3EE;
+      font-size: 0.95em;
+    }
+
+    /* Editeur */
+    #editor-container {
+      position: relative;
+      height: 350px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    #editor {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      font-size: 16px;
+    }
+
+    /* --- BOUTONS REDESIGN (GRANDE TAILLE) --- */
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 25px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 15px;
+    }
+
+    /* Style commun à tous les boutons du bas */
+    .controls button {
+      border: none;
+      position: relative;
+      overflow: hidden;
+
+      /* NOUVELLE TAILLE (similaire au bouton "Commencer") */
+      padding: 16px 36px;
+      /* Padding beaucoup plus grand */
+      font-size: 0.9rem;
+      /* Texte légèrement plus grand */
+      line-height: 1;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+
+      border-radius: 8px;
+      /* Coins un peu plus arrondis */
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      /* Centrer le contenu */
+      gap: 12px;
+
+      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.25);
+      /* Ombre plus prononcée */
+    }
+
+    .controls button span#btnIcon {
+      font-size: 1.2em;
+    }
+
+    .controls button:active {
+      transform: translateY(2px);
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .controls button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      filter: grayscale(1);
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* COULEURS SPÉCIFIQUES */
+
+    /* Bouton Exécuter */
+    .btn-run {
+      background: linear-gradient(135deg, #22D3EE 0%, #0ea5e9 100%);
+      color: #0F172A;
+    }
+
+    .btn-run:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 0 25px rgba(34, 211, 238, 0.5);
+    }
+
+    /* Bouton Reset */
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.05);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .btn-reset:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #F8FAFC;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Boutons Navigation */
+    .btn-nav {
+      background: #2e1065;
+      color: #a78bfa;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+
+    .btn-nav:hover {
+      background: #7F5AF0;
+      color: white;
+      border-color: #7F5AF0;
+      box-shadow: 0 0 20px rgba(127, 90, 240, 0.4);
+    }
+
+    /* Console */
+    .output-area {
+      background: #0b1120;
+      color: #cbd5e1;
+      padding: 20px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      min-height: 80px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.9rem;
+    }
+
+    .status-msg {
+      margin-top: 15px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      display: none;
+      border-left: 5px solid transparent;
+    }
+
+    .success {
+      background: rgba(34, 211, 238, 0.1);
+      color: #22D3EE;
+      border-color: #22D3EE;
+    }
+
+    .error {
+      background: rgba(248, 113, 113, 0.1);
+      color: #F87171;
+      border-color: #F87171;
+    }
+
+    /* Spinner */
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(15, 23, 42, 0.3);
+      border-radius: 50%;
+      border-top-color: #0F172A;
+      animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Mobile Menu Style */
+    #mobile-menu {
+      z-index: 100;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header class="w-full relative z-50">
+    <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
+
+      <a href="index.html" class="logo-container flex items-center space-x-3 group text-decoration-none">
+
+        <svg class="logo-tech" viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="cyber-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:#22D3EE;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#7F5AF0;stop-opacity:1" />
+            </linearGradient>
+          </defs>
+
+          <path
+            d="M55.5 10C35 10 33 24 33 24H54V31H21C16 31 10 35 10 47C10 59 15 63 20 63H27V54C27 42 34 38 43 38H61C68 38 72 32 72 24C72 13 65 10 55.5 10ZM45 19C47 19 48 20 48 22C48 24 46 25 45 25C43 25 41 23 41 22C41 20 43 19 45 19Z"
+            fill="url(#cyber-gradient)" />
+
+          <path
+            d="M54.5 100C75 100 77 86 77 86H56V79H89C94 79 100 75 100 63C100 51 95 47 90 47H83V56C83 68 76 72 67 72H49C42 72 38 78 38 86C38 97 45 100 54.5 100ZM65 91C63 91 62 90 62 88C62 86 64 85 65 85C67 85 69 87 69 88C69 90 67 91 65 91Z"
+            fill="white" fill-opacity="0.9" />
+        </svg>
+
+        <span class="brand-text">
+          LearnPython
+        </span>
+      </a>
+
+      <nav class="hidden md:flex space-x-6 text-[#F8FAFC] font-medium items-center">
+        <a href="index.html" class="hover:text-[#22D3EE] transition">Accueil</a>
+        <a href="en_construction.html" class="hover:text-[#22D3EE] transition">Cours</a>
+        <a href="exercices.html" class="hover:text-[#22D3EE] transition">Exercices</a>
+        <a href="en_construction.html" class="hover:text-[#22D3EE] transition">Communauté</a>
+        <a href="exercices.html"
+          class="ml-4 px-6 py-2 bg-[#7F5AF0] rounded-lg font-semibold btn-glow transition-smooth text-white">Commencer</a>
+      </nav>
+
+      <button id="mobile-menu-btn" class="md:hidden text-[#F8FAFC] focus:outline-none">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div id="mobile-menu"
+      class="hidden md:hidden absolute w-full bg-[#0F172A]/95 backdrop-blur-md border-b border-[#22D3EE]/30 top-full left-0 shadow-xl transition-all duration-300 ease-in-out">
+      <div class="flex flex-col px-6 py-4 space-y-4 font-medium text-center">
+        <a href="index.html" class="block text-[#F8FAFC] hover:text-[#22D3EE] py-2 transition">Accueil</a>
+        <a href="en_construction.html" class="block text-[#F8FAFC] hover:text-[#22D3EE] py-2 transition">Cours</a>
+        <a href="exercices.html" class="block text-[#F8FAFC] hover:text-[#22D3EE] py-2 transition">Exercices</a>
+        <a href="en_construction.html" class="block text-[#F8FAFC] hover:text-[#22D3EE] py-2 transition">Communauté</a>
+        <a href="exercices.html"
+          class="block px-6 py-3 bg-[#7F5AF0] rounded-lg font-semibold btn-glow transition-smooth text-white mx-auto w-full max-w-xs">Commencer</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <div class="content">
+      <div class="flex justify-between items-center border-b border-gray-700 pb-4">
+        <span class="text-gray-400 text-sm font-mono" id="progressText">Exercice 1/?</span>
+        <h2 id="exTitle" class="text-xl font-bold text-white m-0">Titre</h2>
+      </div>
+
+      <div class="consigne-box">
+        <div id="exInstruction">Chargement...</div>
+      </div>
+
+      <div id="editor-container">
+        <div id="editor"># Chargement...</div>
+      </div>
+
+      <div class="controls">
+        <div class="btn-group">
+          <button class="btn-run" onclick="runCode()" id="runBtn" disabled>
+            <span id="btnIcon">▶</span> Exécuter
+          </button>
+          <button class="btn-reset" onclick="resetCode()">↺ Reset</button>
+        </div>
+        <div class="btn-group">
+          <button class="btn-nav" onclick="prevExercise()" id="btnPrev">← Précédent</button>
+          <button class="btn-nav" onclick="nextExercise()" id="btnNext">Suivant →</button>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-[#22D3EE] text-sm uppercase tracking-wider mb-2 font-bold">Console / Résultat :</h3>
+        <div id="output" class="output-area">Initialisation de Pyodide...</div>
+        <div id="status" class="status-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Script Menu Mobile
+    document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+      document.getElementById('mobile-menu').classList.toggle('hidden');
+    });
+
+    // ==========================================
+    // DONNÉES DES EXERCICES (ORGANISÉS PAR DIFFICULTÉ)
+    // NOTE: Pour le LaTeX, utilisez double backslash. Ex: \\sqrt{x}
+    // ==========================================
+    const exercices = [
+
+      // --- NIVEAU 1 : BASES ---
+      {
+        titre: "Échange de variables",
+        consigne: "Niveau 1 - Les bases. Écrire une fonction <code>echange(a, b)</code> qui retourne les deux valeurs inversées $(b, a)$.",
+        code: "def echange(a, b):\n    # En Python, on peut faire a, b = ..., ...\n    return a, b",
+        validation: { type: "function", tests: ["assert echange(10, 20) == (20, 10)", "assert echange('A', 'B') == ('B', 'A')"] }
+      },
+      {
+        titre: "Conversion Température",
+        consigne: "Fonction <code>celsius_vers_fahrenheit(c)</code>. La formule est : $F = c \\times \\frac{9}{5} + 32$.",
+        code: "def celsius_vers_fahrenheit(c):\n    return 0",
+        validation: { type: "function", tests: ["assert celsius_vers_fahrenheit(0) == 32", "assert celsius_vers_fahrenheit(100) == 212"] }
+      },
+      {
+        titre: "Calcul Prix TTC",
+        consigne: "Écrire une fonction <code>prix_ttc(prix_ht, taux)</code>. Retournez le résultat arrondi à 2 décimales. <br> Formule : $Prix_{TTC} = Prix_{HT} \\times (1 + \\frac{taux}{100})$",
+        code: "def prix_ttc(prix_ht, taux):\n    return 0",
+        validation: { type: "function", tests: ["assert prix_ttc(100, 20) == 120.0", "assert prix_ttc(50, 10) == 55.0", "assert prix_ttc(10, 5.5) == 10.55"] }
+      },
+      {
+        titre: "Volume de la Terre",
+        consigne: "Calculer le volume de la Terre ($R = 6400$ km) en <b>milliards</b> de km³. <br>Formule : $V = \\frac{4}{3} \\times \\pi \\times R^3$. <br>Résultat attendu arrondi à l'entier le plus proche.",
+        code: "from math import pi\ndef volume_terre():\n    r = 6400\n    return 0",
+        validation: { type: "function", tests: ["assert volume_terre() == 1098"] }
+      },
+      {
+        titre: "Distance Euclidienne",
+        consigne: "Écrire une fonction <code>distance(xa, ya, xb, yb)</code> qui calcule la longueur du segment $[AB]$. <br>Formule : $AB = \\sqrt{(x_B-x_A)^2 + (y_B-y_A)^2}$.",
+        code: "from math import sqrt\ndef distance(xa, ya, xb, yb):\n    return 0",
+        validation: { type: "function", tests: ["assert distance(0,0, 3,4) == 5.0", "assert abs(distance(1,1, 2,2) - 1.414) < 0.01"] }
+      },
+
+      // --- NIVEAU 2 : CONDITIONS ---
+      {
+        titre: "Triangle Rectangle",
+        consigne: "Fonction <code>est_rectangle(a, b, c)</code> (où $c$ est la plus grande longueur). <br>Retourne <code>True</code> si $a^2 + b^2 = c^2$ (Théorème de Pythagore).",
+        code: "def est_rectangle(a, b, c):\n    return False",
+        validation: { type: "function", tests: ["assert est_rectangle(3, 4, 5) == True", "assert est_rectangle(1, 1, 2) == False"] }
+      },
+      {
+        titre: "Logique devinette",
+        consigne: "Fonction <code>verif_devinette(secret, essai)</code>. Retourne 'Trop grand', 'Trop petit' ou 'Gagné' selon la comparaison.",
+        code: "def verif_devinette(secret, essai):\n    # Comparez secret et essai\n    return \"\"",
+        validation: { type: "function", tests: ["assert verif_devinette(10, 5) == 'Trop petit'", "assert verif_devinette(10, 15) == 'Trop grand'", "assert verif_devinette(10, 10) == 'Gagné'"] }
+      },
+      {
+        titre: "Pierre-Feuille-Ciseaux",
+        consigne: "Fonction <code>gagnant_pfc(j1, j2)</code> (valeurs: 'P', 'F', 'C'). Retourne 'J1', 'J2' ou 'Nul'.",
+        code: "def gagnant_pfc(j1, j2):\n    if j1 == j2: return 'Nul'\n    # Complétez la logique\n    return 'J1'",
+        validation: { type: "function", tests: ["assert gagnant_pfc('P', 'C') == 'J1'", "assert gagnant_pfc('P', 'F') == 'J2'", "assert gagnant_pfc('F', 'F') == 'Nul'"] }
+      },
+
+      // --- NIVEAU 3 : BOUCLES FOR ---
+      {
+        titre: "Somme des carrés",
+        consigne: "Calculer la somme : $S = \\sum_{i=1}^{n} i^2 = 1^2 + 2^2 + ... + n^2$.",
+        code: "def somme_carres(n):\n    total = 0\n    for i in range(1, n+1):\n        # total = total + ...\n        pass\n    return total",
+        validation: { type: "function", tests: ["assert somme_carres(3) == 14", "assert somme_carres(1) == 1"] }
+      },
+      {
+        titre: "Table de multiplication",
+        consigne: "Affichez la table de 5 sous la forme : '5x0=0', '5x1=5' ... jusqu'à 10.",
+        code: "n = 5\nfor i in range(11):\n    pass",
+        validation: { type: "output_includes", values: ["5x0=0", "5x1=5", "5x10=50"] }
+      },
+      {
+        titre: "Factorielle",
+        consigne: "Calculer $n! = 1 \\times 2 \\times ... \\times n$.",
+        code: "def factorielle(n):\n    res = 1\n    # Boucle for\n    return res",
+        validation: { type: "function", tests: ["assert factorielle(5) == 120", "assert factorielle(0) == 1"] }
+      },
+
+      // --- NIVEAU 4 : BOUCLES WHILE ---
+      {
+        titre: "Compter les chiffres",
+        consigne: "Fonction <code>nb_chiffres(n)</code>. Tant que $10^k \\le n$, on continue d'incrémenter $k$.",
+        code: "def nb_chiffres(n):\n    k = 0\n    while 10**k <= n:\n        k = k + 1\n    return k",
+        validation: { type: "function", tests: ["assert nb_chiffres(5) == 1", "assert nb_chiffres(100) == 3", "assert nb_chiffres(99) == 2"] }
+      },
+      {
+        titre: "Puissance de 2",
+        consigne: "Trouver la plus grande puissance de 2 telle que $2^p \\le M$.",
+        code: "def plus_grande_puissance_2(m):\n    p = 1\n    while p*2 <= m:\n        p = p * 2\n    return p",
+        validation: { type: "function", tests: ["assert plus_grande_puissance_2(7) == 4", "assert plus_grande_puissance_2(16) == 16", "assert plus_grande_puissance_2(100) == 64"] }
+      },
+      {
+        titre: "Doubler son capital",
+        consigne: "On place 1000€. Taux annuel $t$%. Chaque année $Capital = Capital \\times (1 + t/100)$. Combien d'années pour dépasser 2000€ ?",
+        code: "def annees_doublement(t):\n    capital = 1000\n    annees = 0\n    while capital < 2000:\n        # Calcul\n        annees += 1\n    return annees",
+        validation: { type: "function", tests: ["assert annees_doublement(100) == 1", "assert annees_doublement(5) == 15"] }
+      },
+      {
+        titre: "Dichotomie",
+        consigne: "Trouver $x$ tel que $x^2 - x - 1 = 0$ sur l'intervalle $[1, 2]$ avec une précision de $0.0001$.",
+        code: "def resolution_dichotomie():\n    a, b = 1.0, 2.0\n    while (b - a) > 0.0001:\n        m = (a + b) / 2\n        if m**2 - m - 1 > 0:\n            b = m\n        else:\n            a = m\n    return a",
+        validation: { type: "function", tests: ["assert abs(resolution_dichotomie() - 1.618) < 0.001"] }
+      },
+
+      // --- NIVEAU 5 : CHAINES DE CARACTÈRES ---
+      {
+        titre: "Inverser une chaîne",
+        consigne: "Retourner la chaîne inversée (ex: 'Salut' -> 'tulaS'). Astuce slice : <code>[::-1]</code>.",
+        code: "def inverse(chaine):\n    return chaine[::-1] # Indice !",
+        validation: { type: "function", tests: ["assert inverse('Python') == 'nohtyP'"] }
+      },
+      {
+        titre: "Palindrome",
+        consigne: "Un mot est un palindrome s'il se lit pareil dans les deux sens (ex: 'radar').",
+        code: "def est_palindrome(mot):\n    return False",
+        validation: { type: "function", tests: ["assert est_palindrome('radar') == True", "assert est_palindrome('python') == False"] }
+      },
+      {
+        titre: "Anagrammes",
+        consigne: "Deux mots sont anagrammes s'ils ont exactement les mêmes lettres (ex: 'chien' et 'niche'). Astuce: trier les lettres.",
+        code: "def anagrammes(a, b):\n    return sorted(list(a)) == sorted(list(b))",
+        validation: { type: "function", tests: ["assert anagrammes('chien', 'niche') == True", "assert anagrammes('abc', 'abd') == False"] }
+      },
+
+      // --- NIVEAU 6 : FONCTIONS AVANCÉES ---
+      {
+        titre: "PGCD",
+        consigne: "Plus Grand Commun Diviseur. Utiliser l'algorithme d'Euclide : tant que $b > 0$, $(a, b) = (b, a \\% b)$.",
+        code: "def pgcd(a, b):\n    while b > 0:\n        a, b = b, a % b\n    return a",
+        validation: { type: "function", tests: ["assert pgcd(48, 18) == 6", "assert pgcd(17, 3) == 1"] }
+      },
+      {
+        titre: "Nombre Premier",
+        consigne: "Vérifier si $n$ est premier (divisible seulement par 1 et lui-même).",
+        code: "def est_premier(n):\n    if n < 2: return False\n    for i in range(2, n):\n        if n % i == 0:\n            return False\n    return True",
+        validation: { type: "function", tests: ["assert est_premier(7) == True", "assert est_premier(9) == False"] }
+      },
+      {
+        titre: "Nombre d'Armstrong",
+        consigne: "Un nombre est Armstrong si la somme des cubes de ses chiffres vaut le nombre. <br>Ex: $153 = 1^3 + 5^3 + 3^3$.",
+        code: "def est_armstrong(n):\n    s = 0\n    # Convertir n en chaine pour itérer sur les chiffres\n    return False",
+        validation: { type: "function", tests: ["assert est_armstrong(153) == True", "assert est_armstrong(10) == False"] }
+      },
+      {
+        titre: "Suite de Fibonacci",
+        consigne: "Calculer le terme $u_n$. <br> $u_0=0, u_1=1$ et $u_n = u_{n-1} + u_{n-2}$.",
+        code: "def fibo(n):\n    a, b = 0, 1\n    # Boucle\n    return a",
+        validation: { type: "function", tests: ["assert fibo(5) == 5", "assert fibo(10) == 55"] }
+      },
+
+      // --- NIVEAU 7 : LISTES ---
+      {
+        titre: "Générer une liste",
+        consigne: "Retourner une liste contenant la table de 5 de 0 à 9 : $[0, 5, 10 ... 45]$.",
+        code: "def liste_table_5():\n    # Utilisez une boucle ou une compréhension [x for x in ...]\n    return []",
+        validation: { type: "function", tests: ["assert liste_table_5() == [0, 5, 10, 15, 20, 25, 30, 35, 40, 45]"] }
+      },
+      {
+        titre: "Différence de listes",
+        consigne: "Retourner les éléments de liste1 qui ne sont **pas** dans liste2.",
+        code: "def diff_listes(l1, l2):\n    return []",
+        validation: { type: "function", tests: ["assert diff_listes([1,2,3], [2]) == [1, 3]"] }
+      },
+      {
+        titre: "Crible (Nombres premiers)",
+        consigne: "Retourner la liste de tous les nombres premiers jusqu'à $n$.",
+        code: "def liste_premiers(n):\n    res = []\n    # Utilisez votre fonction est_premier(k)\n    return res",
+        validation: { type: "function", tests: ["assert liste_premiers(10) == [2, 3, 5, 7]"] }
+      }
+    ];
+
+    // ==========================================
+    // LOGIQUE DE L'APPLICATION
+    // ==========================================
+    let editor, pyodide;
+    let currentIdx = 0;
+    const outputDiv = document.getElementById("output");
+    const statusDiv = document.getElementById("status");
+    const runBtn = document.getElementById("runBtn");
+
+    // Initialisation Ace Editor
+    editor = ace.edit("editor");
+    editor.setTheme("ace/theme/tomorrow_night_eighties");
+    editor.session.setMode("ace/mode/python");
+    editor.setFontSize(16);
+
+    // Initialisation Pyodide
+    async function initPyodide() {
+      try {
+        pyodide = await loadPyodide();
+        outputDiv.innerText = "Environnement Python prêt. Cliquez sur 'Exécuter'.\n";
+        runBtn.disabled = false;
+        document.getElementById("progressText").innerText = `Prêt`;
+        loadExercise(0);
+      } catch (err) {
+        outputDiv.innerText = "Erreur de chargement de Python. Vérifiez votre connexion.\n" + err;
+      }
+    }
+    initPyodide();
+
+    function loadExercise(index) {
+      currentIdx = index;
+      const ex = exercices[index];
+
+      document.getElementById("exTitle").innerText = `${index + 1}. ${ex.titre}`;
+      document.getElementById("progressText").innerText = `Exercice ${index + 1} / ${exercices.length}`;
+
+      // Injection de la consigne
+      const instructionDiv = document.getElementById("exInstruction");
+      instructionDiv.innerHTML = ex.consigne;
+
+      // DEMANDER A MATHJAX DE DESSINER LES FORMULES
+      if (window.MathJax) {
+        MathJax.typesetPromise([instructionDiv]);
+      }
+
+      editor.setValue(ex.code, -1);
+
+      outputDiv.innerText = "";
+      statusDiv.style.display = "none";
+      statusDiv.className = "status-msg";
+
+      document.getElementById("btnPrev").disabled = (index === 0);
+      document.getElementById("btnNext").disabled = (index === exercices.length - 1);
+    }
+
+    async function runCode() {
+      const ex = exercices[currentIdx];
+      const userCode = editor.getValue();
+
+      outputDiv.innerText = "";
+      statusDiv.style.display = "none";
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<span class="loader"></span> ...';
+
+      pyodide.setStdout({ batched: (msg) => outputDiv.innerText += msg + "\n" });
+
+      try {
+        await pyodide.runPythonAsync(userCode);
+
+        let success = false;
+        let message = "";
+
+        if (ex.validation.type === "manual") {
+          statusDiv.className = "status-msg success";
+          statusDiv.innerHTML = `⚠️ <strong>Validation manuelle :</strong><br>${ex.validation.hint}`;
+          statusDiv.style.display = "block";
+          resetBtnState();
+          return;
+        }
+
+        if (ex.validation.type === "output_list") {
+          const userLines = outputDiv.innerText.trim().split('\n').map(s => s.trim()).filter(s => s !== "");
+          const expected = ex.validation.values;
+          success = (userLines.length === expected.length) && userLines.every((val, index) => val == expected[index]);
+          if (!success) message = `Sortie attendue : ${expected.slice(0, 5).join(", ")}... <br> Obtenue : ${userLines.slice(0, 5).join(", ")}...`;
+        }
+        else if (ex.validation.type === "output_includes") {
+          const content = outputDiv.innerText;
+          success = ex.validation.values.every(val => content.includes(val));
+          if (!success) message = "Votre affichage ne contient pas toutes les valeurs attendues.";
+        }
+        else if (ex.validation.type === "function") {
+          try {
+            for (let test of ex.validation.tests) {
+              await pyodide.runPythonAsync(test);
+            }
+            success = true;
+          } catch (e) {
+            success = false;
+            message = "La fonction ne retourne pas le bon résultat.";
+          }
+        }
+
+        statusDiv.style.display = "block";
+        if (success) {
+          statusDiv.className = "status-msg success";
+          statusDiv.innerHTML = "✅ Bravo ! Exercice validé.";
+        } else {
+          statusDiv.className = "status-msg error";
+          statusDiv.innerHTML = `❌ Incorrect.<br><small>${message}</small>`;
+        }
+
+      } catch (err) {
+        outputDiv.innerText += "\n🛑 Erreur Python :\n" + err;
+        statusDiv.style.display = "block";
+        statusDiv.className = "status-msg error";
+        statusDiv.innerHTML = "Votre code contient une erreur.";
+      }
+
+      resetBtnState();
+    }
+
+    function resetBtnState() {
+      runBtn.disabled = false;
+      runBtn.innerHTML = '<span id="btnIcon">▶</span> Exécuter';
+    }
+
+    function resetCode() {
+      if (confirm("Réinitialiser le code ?")) {
+        editor.setValue(exercices[currentIdx].code, -1);
+        outputDiv.innerText = "";
+        statusDiv.style.display = "none";
+      }
+    }
+
+    function nextExercise() { if (currentIdx < exercices.length - 1) loadExercise(currentIdx + 1); }
+    function prevExercise() { if (currentIdx > 0) loadExercise(currentIdx - 1); }
+
+  </script>
+</body>
+
+</html>

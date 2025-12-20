@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Exercices Python Interactifs - LearnPython</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    /* Thème sombre moderne basé sur votre design */
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0F172A;
+      color: #F8FAFC;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Dégradé d'arrière-plan */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      background: linear-gradient(120deg, #7F5AF0, #22D3EE, #7F5AF0);
+      background-size: 600% 600%;
+      animation: gradient 20s ease infinite;
+      opacity: 0.15;
+    }
+
+    @keyframes gradient {
+      0% {
+        background-position: 0% 50%
+      }
+
+      50% {
+        background-position: 100% 50%
+      }
+
+      100% {
+        background-position: 0% 50%
+      }
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 1000px;
+      margin: 40px auto;
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Header */
+    .header {
+      background: linear-gradient(135deg, rgba(127, 90, 240, 0.9), rgba(34, 211, 238, 0.9));
+      color: white;
+      padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .progress-badge {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 5px 15px;
+      border-radius: 20px;
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+
+    .back-link {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Consigne */
+    .content {
+      padding: 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .consigne-box {
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 5px solid #7F5AF0;
+      padding: 15px;
+      border-radius: 4px;
+    }
+
+    .consigne-box h2 {
+      margin-top: 0;
+      color: #22D3EE;
+      font-size: 1.2rem;
+    }
+
+    code {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 5px;
+      border-radius: 4px;
+      font-family: monospace;
+      color: #22D3EE;
+    }
+
+    /* Editeur */
+    #editor-container {
+      position: relative;
+      height: 350px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    #editor {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      font-size: 16px;
+    }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      padding: 12px 24px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+      font-size: 1rem;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-run {
+      background: #22D3EE;
+      color: #0F172A;
+    }
+
+    .btn-run:hover {
+      background: #1E293B;
+      color: #22D3EE;
+      box-shadow: 0 0 10px #22D3EE;
+    }
+
+    .btn-reset {
+      background: #FFC107;
+      color: #333;
+    }
+
+    .btn-reset:hover {
+      background: #e0a800;
+    }
+
+    .btn-nav {
+      background: #7F5AF0;
+      color: white;
+    }
+
+    .btn-nav:hover {
+      background: #6c48d6;
+    }
+
+    /* Output & Status */
+    .output-area {
+      background: #1E293B;
+      color: #22D3EE;
+      padding: 15px;
+      border-radius: 8px;
+      font-family: 'Courier New', monospace;
+      white-space: pre-wrap;
+      min-height: 80px;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .status-msg {
+      margin-top: 10px;
+      padding: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      display: none;
+    }
+
+    .success {
+      background: rgba(34, 211, 238, 0.2);
+      color: #22D3EE;
+      border: 1px solid #22D3EE;
+      display: block;
+    }
+
+    .error {
+      background: rgba(248, 113, 113, 0.2);
+      color: #F87171;
+      border: 1px solid #F87171;
+      display: block;
+    }
+
+    .loader {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255, 255, 255, .3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="main-container">
+    <div class="header">
+      <a href="index.html" class="back-link">← Accueil</a>
+      <h1>🐍 Exercices Interactifs</h1>
+      <span class="progress-badge" id="progressText">Chargement...</span>
+    </div>
+
+    <div class="content">
+      <div class="consigne-box">
+        <h2 id="exTitle">Titre de l'exercice</h2>
+        <div id="exInstruction">Chargement des exercices...</div>
+      </div>
+
+      <div id="editor-container">
+        <div id="editor"># Chargement de l'environnement Python...</div>
+      </div>
+
+      <div class="controls">
+        <div class="btn-group">
+          <button class="btn-run" onclick="runCode()" id="runBtn" disabled>
+            <span id="btnIcon">▶</span> Exécuter
+          </button>
+          <button class="btn-reset" onclick="resetCode()">↺ Réinitialiser</button>
+        </div>
+        <div class="btn-group">
+          <button class="btn-nav" onclick="prevExercise()" id="btnPrev">← Précédent</button>
+          <button class="btn-nav" onclick="nextExercise()" id="btnNext">Suivant →</button>
+        </div>
+      </div>
+
+      <div>
+        <h3>Résultat / Console :</h3>
+        <div id="output" class="output-area">Initialisation de Pyodide...</div>
+        <div id="status" class="status-msg"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // DONNÉES DES EXERCICES (Code précédent conservé)
+    // ==========================================
+    const exercices = [
+      {
+        titre: "Multiples de 3",
+        consigne: "Écrire une boucle qui affiche les multiples de 3 entre 1 et 50 (3, 6, 9...). Un nombre par ligne.",
+        code: "for i in range(1, 51):\n    # Votre code ici\n    pass",
+        validation: { type: "output_list", values: ["3", "6", "9", "12", "15", "18", "21", "24", "27", "30", "33", "36", "39", "42", "45", "48"] }
+      },
+      {
+        titre: "Somme des cubes",
+        consigne: "Écrire une fonction <code>somme_cubes(n)</code> qui retourne la somme des cubes des entiers de 1 à <code>n</code>.",
+        code: "def somme_cubes(n):\n    # Votre code ici\n    return 0",
+        validation: { type: "function", tests: ["assert somme_cubes(3) == 36", "assert somme_cubes(1) == 1", "assert somme_cubes(2) == 9"] }
+      },
+      {
+        titre: "Table de multiplication",
+        consigne: "Écrire une fonction <code>table_multiplication(n)</code> qui affiche la table de 1 à 10. Format attendu: '5x1=5'.",
+        code: "def table_multiplication(n):\n    for i in range(1, 11):\n        # Utilisez print()\n        pass",
+        validation: { type: "output_includes", values: ["5x1=5", "5x2=10", "5x10=50"] }
+      },
+      {
+        titre: "Factorielle",
+        consigne: "Écrire une fonction <code>factorielle(n)</code> qui calcule la factorielle de n.",
+        code: "def factorielle(n):\n    res = 1\n    # Complétez la boucle\n    return res",
+        validation: { type: "function", tests: ["assert factorielle(5) == 120", "assert factorielle(3) == 6", "assert factorielle(0) == 1"] }
+      },
+      {
+        titre: "PGCD",
+        consigne: "Écrire une fonction <code>pgcd(a, b)</code> qui retourne le Plus Grand Commun Diviseur.",
+        code: "import math\ndef pgcd(a, b):\n    # Vous pouvez utiliser l'algorithme d'Euclide\n    return 1",
+        validation: { type: "function", tests: ["assert pgcd(48, 18) == 6", "assert pgcd(10, 5) == 5", "assert pgcd(17, 3) == 1"] }
+      },
+      {
+        titre: "Nombre premier",
+        consigne: "Écrire une fonction <code>est_premier(n)</code> qui retourne True si n est premier, False sinon.",
+        code: "def est_premier(n):\n    if n < 2: return False\n    # Votre logique ici\n    return True",
+        validation: { type: "function", tests: ["assert est_premier(7) == True", "assert est_premier(8) == False", "assert est_premier(11) == True"] }
+      },
+      {
+        titre: "Nombres premiers (1-100)",
+        consigne: "Affichez tous les nombres premiers entre 1 et 100, un par ligne.",
+        code: "# Vous pouvez réutiliser votre fonction est_premier si vous la copiez ici\nfor i in range(1, 101):\n    pass",
+        validation: { type: "output_list", values: ["2", "3", "5", "7", "11", "13", "17", "19", "23", "29", "31", "37", "41", "43", "47", "53", "59", "61", "67", "71", "73", "79", "83", "89", "97"] }
+      },
+      {
+        titre: "Inverser une chaîne",
+        consigne: "Écrire une fonction <code>inverse_chaine(chaine)</code> qui retourne la chaîne inversée.",
+        code: "def inverse_chaine(chaine):\n    return \"\" # À modifier",
+        validation: { type: "function", tests: ["assert inverse_chaine('bonjour') == 'ruojnob'", "assert inverse_chaine('Python') == 'nohtyP'"] }
+      },
+      {
+        titre: "Compter les mots",
+        consigne: "Écrire une fonction <code>compter_mots(phrase)</code> qui retourne le nombre de mots (séparés par des espaces).",
+        code: "def compter_mots(phrase):\n    # Indice: utilisez split()\n    return 0",
+        validation: { type: "function", tests: ["assert compter_mots('Bonjour le monde') == 3", "assert compter_mots('Un') == 1"] }
+      },
+      {
+        titre: "Palindrome",
+        consigne: "Fonction <code>est_palindrome(chaine)</code> retournant True si c'est un palindrome (se lit pareil dans les deux sens).",
+        code: "def est_palindrome(chaine):\n    return False",
+        validation: { type: "function", tests: ["assert est_palindrome('radar') == True", "assert est_palindrome('python') == False", "assert est_palindrome('kayak') == True"] }
+      },
+      {
+        titre: "Lancer de dé (Simulation)",
+        consigne: "Écrire une fonction <code>lancer_de()</code> qui retourne un entier aléatoire entre 1 et 6.",
+        code: "import random\ndef lancer_de():\n    return 0",
+        validation: { type: "function", tests: ["assert 1 <= lancer_de() <= 6", "assert isinstance(lancer_de(), int)"] }
+      },
+      {
+        titre: "Puissance",
+        consigne: "Fonction <code>puissance(x, n)</code> calculant x^n sans utiliser `**`.",
+        code: "def puissance(x, n):\n    res = 1\n    # Boucle pour multiplier x par lui-même n fois\n    return res",
+        validation: { type: "function", tests: ["assert puissance(2, 3) == 8", "assert puissance(5, 2) == 25"] }
+      },
+      {
+        titre: "Suite de Syracuse",
+        consigne: "Affichez les termes de la suite de Syracuse pour N=6 jusqu'à atteindre 1. (Rappel: pair->n/2, impair->3n+1)",
+        code: "n = 6\nwhile n != 1:\n    print(int(n))\n    # Logique ici\n    break # Sécurité boucle infinie",
+        validation: { type: "output_includes", values: ["6", "3", "10", "5", "16", "8", "4", "2"] }
+      },
+      {
+        titre: "Somme des chiffres",
+        consigne: "Fonction <code>somme_chiffres(n)</code> retournant la somme des chiffres (ex: 123 -> 6).",
+        code: "def somme_chiffres(n):\n    # Astuce: convertir en string ou utiliser le modulo\n    return 0",
+        validation: { type: "function", tests: ["assert somme_chiffres(123) == 6", "assert somme_chiffres(405) == 9"] }
+      },
+      {
+        titre: "Nombre d'Armstrong",
+        consigne: "Un nombre est Armstrong si la somme des cubes de ses chiffres est égale au nombre. Fonction <code>est_armstrong(n)</code>.",
+        code: "def est_armstrong(n):\n    return False",
+        validation: { type: "function", tests: ["assert est_armstrong(153) == True", "assert est_armstrong(10) == False", "assert est_armstrong(370) == True"] }
+      },
+      {
+        titre: "Nombre parfait",
+        consigne: "Un nombre est parfait s'il est égal à la somme de ses diviseurs propres. Fonction <code>est_parfait(n)</code>.",
+        code: "def est_parfait(n):\n    somme_div = 0\n    # Calculez la somme des diviseurs < n\n    return somme_div == n",
+        validation: { type: "function", tests: ["assert est_parfait(6) == True", "assert est_parfait(28) == True", "assert est_parfait(12) == False"] }
+      },
+      {
+        titre: "Nombres parfaits < 1000",
+        consigne: "Affichez tous les nombres parfaits inférieurs à 1000.",
+        code: "for n in range(1, 1000):\n    # Code pour vérifier et afficher\n    pass",
+        validation: { type: "output_list", values: ["6", "28", "496"] }
+      },
+      {
+        titre: "Nombres amis",
+        consigne: "Fonction <code>est_ami(a, b)</code>. Deux nombres sont amis si la somme des diviseurs de a vaut b et inversement.",
+        code: "def est_ami(a, b):\n    return False",
+        validation: { type: "function", tests: ["assert est_ami(220, 284) == True", "assert est_ami(10, 12) == False"] }
+      },
+      {
+        titre: "Conversion Température",
+        consigne: "Fonction <code>celsius_vers_fahrenheit(c)</code>. Formule : (c * 9/5) + 32.",
+        code: "def celsius_vers_fahrenheit(c):\n    return 0",
+        validation: { type: "function", tests: ["assert celsius_vers_fahrenheit(0) == 32", "assert celsius_vers_fahrenheit(100) == 212"] }
+      },
+      {
+        titre: "Volume d'une boule",
+        consigne: "Fonction <code>volume_boule(rayon)</code>. Formule : (4/3) * pi * r^3.",
+        code: "import math\ndef volume_boule(rayon):\n    return 0",
+        validation: { type: "function", tests: ["assert abs(volume_boule(1) - 4.188) < 0.01"] }
+      },
+      {
+        titre: "Jours dans un mois",
+        consigne: "Fonction <code>nb_jours(mois, annee)</code>. Attention aux années bissextiles pour février.",
+        code: "def nb_jours(mois, annee):\n    if mois in [1, 3, 5, 7, 8, 10, 12]: return 31\n    # Complétez la logique\n    return 30",
+        validation: { type: "function", tests: ["assert nb_jours(1, 2021) == 31", "assert nb_jours(2, 2020) == 29", "assert nb_jours(2, 2021) == 28", "assert nb_jours(4, 2021) == 30"] }
+      },
+      {
+        titre: "Logique devinette",
+        consigne: "Fonction <code>verif_devinette(secret, essai)</code>. Retourne 'Trop grand', 'Trop petit' ou 'Gagné'.",
+        code: "def verif_devinette(secret, essai):\n    # Comparez secret et essai\n    return \"\"",
+        validation: { type: "function", tests: ["assert verif_devinette(10, 5) == 'Trop petit'", "assert verif_devinette(10, 15) == 'Trop grand'", "assert verif_devinette(10, 10) == 'Gagné'"] }
+      },
+      {
+        titre: "Pierre-Feuille-Ciseaux",
+        consigne: "Fonction <code>gagnant_pfc(j1, j2)</code> (valeurs: 'P', 'F', 'C'). Retourne 'J1', 'J2' ou 'Nul'.",
+        code: "def gagnant_pfc(j1, j2):\n    if j1 == j2: return 'Nul'\n    # Logique pour P, F, C\n    return 'J1'",
+        validation: { type: "function", tests: ["assert gagnant_pfc('P', 'C') == 'J1'", "assert gagnant_pfc('P', 'F') == 'J2'", "assert gagnant_pfc('F', 'F') == 'Nul'"] }
+      },
+      {
+        titre: "Fréquence des faces",
+        consigne: "Simulez 100 lancers et affichez la liste des fréquences pour les faces 1 à 6.",
+        code: "import random\nfreq = [0] * 6\n# Simulez 100 lancers et remplissez freq\nprint(freq)",
+        validation: { type: "manual", hint: "La sortie doit être une liste de 6 nombres dont la somme fait 100." }
+      },
+      // ... suite de la liste
+
+      {
+        titre: "Compter les chiffres",
+        consigne: "Exercice 5 (p.33) : Écrire une fonction <code>nb_chiffres(n)</code> qui retourne le nombre de chiffres d'un entier <code>n</code> en utilisant une boucle <code>while</code> et des puissances de 10.",
+        code: "def nb_chiffres(n):\n    nb = 0\n    # Tant que 10 puissance nb est <= n...\n    # Incrémenter nb\n    return nb",
+        validation: { type: "function", tests: ["assert nb_chiffres(5) == 1", "assert nb_chiffres(465) == 3", "assert nb_chiffres(1000) == 4"] }
+      },
+      {
+        titre: "Puissance de 2 (Binaire)",
+        consigne: "Exercice 6 (p.33) : Écrire une fonction <code>puis2(m)</code> qui retourne la plus grande puissance de 2 inférieure ou égale à <code>m</code>. (Ex: pour 7, retourne 4 car 2^2=4 <= 7 < 2^3).",
+        code: "def puis2(m):\n    n = 0\n    while 2**n <= m:\n        n = n + 1\n    return 2**(n-1)",
+        validation: { type: "function", tests: ["assert puis2(7) == 4", "assert puis2(16) == 16", "assert puis2(100) == 64"] }
+      },
+      {
+        titre: "Convertisseur Secondes -> HMS",
+        consigne: "Exercice 7 (p.34) : Écrire une fonction <code>conversion_hms(nbsecondes)</code> qui retourne un tuple (h, m, s). Utilisez les opérateurs <code>//</code> et <code>%</code>.",
+        code: "def conversion_hms(nbsecondes):\n    # Heures = total // 3600\n    # Reste après heures\n    # Minutes = reste // 60\n    # Secondes = reste % 60\n    return (0, 0, 0)",
+        validation: { type: "function", tests: ["assert conversion_hms(3600) == (1, 0, 0)", "assert conversion_hms(3661) == (1, 1, 1)", "assert conversion_hms(7820) == (2, 10, 20)"] }
+      },
+      {
+        titre: "Distributeur de billets",
+        consigne: "Exercice 8 (p.34) : Algorithme glouton. Écrire <code>distributeur(montant)</code> qui retourne le nombre de billets de 50, 20 et 10 nécessaires pour atteindre le montant.",
+        code: "def distributeur(montant):\n    nb50 = montant // 50\n    reste = montant % 50\n    nb20 = reste // 20\n    reste = reste % 20\n    nb10 = reste // 10\n    return (nb50, nb20, nb10)",
+        validation: { type: "function", tests: ["assert distributeur(380) == (7, 1, 1)", "assert distributeur(60) == (1, 0, 1)", "assert distributeur(130) == (2, 1, 1)"] }
+      },
+      {
+        titre: "Piège : Print vs Return",
+        consigne: "Exercice 13 (p.37) : Analysez la différence. Écrire une fonction <code>trouver_tout(n)</code> qui retourne la liste de TOUS les entiers <code>k</code> de 0 à n tels que <code>k*k == k</code> (donc 0 et 1). Attention à ne pas utiliser return trop tôt !",
+        code: "def trouver_tout(n):\n    resultats = []\n    for k in range(n + 1):\n        if k * k == k:\n            resultats.append(k)\n            # Si vous mettez 'return k' ici, la boucle s'arrête au premier résultat !\n    return resultats",
+        validation: { type: "function", tests: ["assert trouver_tout(5) == [0, 1]", "assert trouver_tout(0) == [0]"] }
+      },
+      // ... à ajouter à la suite de vos exercices existants
+
+      {
+        titre: "Modulo manuel (Reste)",
+        consigne: "Le document Belin présente une fonction 'mystere' qui calcule le reste de la division par 11 sans utiliser `%`. <br>Écrire une fonction <code>reste_div(n, d)</code> qui retourne le reste de la division de <code>n</code> par <code>d</code> en utilisant uniquement une boucle <code>while</code> et des soustractions.",
+        code: "def reste_div(n, d):\n    # Tant que n est plus grand ou égal à d...\n    # On soustrait d à n\n    return n",
+        validation: { type: "function", tests: ["assert reste_div(25, 11) == 3", "assert reste_div(100, 10) == 0", "assert reste_div(14, 3) == 2"] }
+      },
+      {
+        titre: "Doubler son capital",
+        consigne: "On place une somme à un taux d'intérêt annuel <code>t</code> (en %). Écrire une fonction <code>annees_pour_doubler(t)</code> qui retourne le nombre d'années nécessaires pour que le capital double.",
+        code: "def annees_pour_doubler(t):\n    capital = 1000 # Somme de départ arbitraire\n    objectif = 2000\n    annees = 0\n    # Utilisez une boucle while pour augmenter le capital tant qu'il est < objectif\n    # Formule : capital = capital * (1 + t/100)\n    return annees",
+        validation: { type: "function", tests: ["assert annees_pour_doubler(100) == 1", "assert annees_pour_doubler(5) == 15", "assert annees_pour_doubler(10) == 8"] }
+      },
+      {
+        titre: "Calcul Prix TTC",
+        consigne: "Écrire une fonction <code>prix_ttc(prix_ht, taux)</code> qui prend un prix hors taxe et un taux de TVA (ex: 20 pour 20%) et retourne le prix TTC arrondi à 2 chiffres après la virgule.",
+        code: "def prix_ttc(prix_ht, taux):\n    # Calculer le montant final\n    # Utilisez round(valeur, 2) pour arrondir\n    return 0",
+        validation: { type: "function", tests: ["assert prix_ttc(100, 20) == 120.0", "assert prix_ttc(50, 10) == 55.0", "assert prix_ttc(10, 5.5) == 10.55"] }
+      },
+      {
+        titre: "Calcul Hypoténuse",
+        consigne: "D'après le théorème de Pythagore (Cahier p.21), dans un triangle rectangle, $c = \\sqrt{a^2 + b^2}$. Écrire une fonction <code>hypotenuse(a, b)</code>.",
+        code: "import math\ndef hypotenuse(a, b):\n    # Utilisez math.sqrt()\n    return 0",
+        validation: { type: "function", tests: ["assert abs(hypotenuse(3, 4) - 5) < 0.01", "assert abs(hypotenuse(5, 12) - 13) < 0.01"] }
+      },
+      {
+        titre: "Seuil de Koch",
+        consigne: "La longueur d'une courbe de Koch est multipliée par $4/3$ à chaque étape. Écrire une fonction <code>seuil_koch(longueur_init, cible)</code> qui retourne le nombre d'étapes pour dépasser la longueur <code>cible</code>.",
+        code: "def seuil_koch(longueur_init, cible):\n    n = 0\n    courante = longueur_init\n    while courante < cible:\n        courante = courante * (4/3)\n        n += 1\n    return n",
+        validation: { type: "function", tests: ["assert seuil_koch(100, 133) == 1", "assert seuil_koch(100, 200) == 3"] }
+      },
+      // ... À AJOUTER À LA SUITE DE LA LISTE EXISTANTE ...
+
+      // --- LEÇON 1 : Variables et Opérations ---
+      {
+        titre: "Échange de variables",
+        consigne: "Leçon 1 - Ex 4 : Écrire une fonction <code>echange(a, b)</code> qui retourne les deux valeurs inversées (b, a).",
+        code: "def echange(a, b):\n    # Utilisez l'affectation multiple\n    return a, b",
+        validation: { type: "function", tests: ["assert echange(10, 20) == (20, 10)", "assert echange('A', 'B') == ('B', 'A')"] }
+      },
+      {
+        titre: "Volume de la Terre",
+        consigne: "Leçon 1 - Ex 6 : Calculer le volume de la Terre (rayon 6400 km) en milliards de km³. Formule : $4/3 \\times \\pi \\times R^3$. Retournez le résultat arrondi à l'entier.",
+        code: "from math import pi\ndef volume_terre():\n    r = 6400\n    # Calcul du volume\n    vol = 0 \n    return round(vol / 10**9)", // Division par 10^9 pour avoir des milliards
+        validation: { type: "function", tests: ["assert volume_terre() == 1098"] }
+      },
+
+      // --- LEÇON 2 : Chaînes de caractères ---
+      {
+        titre: "Extraction de chaîne",
+        consigne: "Leçon 2 - Ex 4 : Écrire une fonction <code>troisieme_caractere(phrase)</code> qui retourne une chaîne contenant un caractère sur 3 de la phrase donnée.",
+        code: "def troisieme_caractere(phrase):\n    # Utilisez le slicing [::n]\n    return \"\"",
+        validation: { type: "function", tests: ["assert troisieme_caractere('C\\'est une phrase') == 'Ctu r'", "assert troisieme_caractere('Python') == 'Ph'"] }
+      },
+      {
+        titre: "Cryptage 'a' <-> 'o'",
+        consigne: "Leçon 2 - Ex 5 (Difficile) : Remplacer tous les 'a' par des 'o' et tous les 'o' par des 'a' dans une phrase. <br>Astuce : Passez par un caractère intermédiaire temporaire.",
+        code: "def crypter_ao(phrase):\n    # Remplacer 'a' par '@' (par exemple)\n    # Remplacer 'o' par 'a'\n    # Remplacer '@' par ...\n    return phrase",
+        validation: { type: "function", tests: ["assert crypter_ao('bonjour a tous') == 'banjaur o taus'", "assert crypter_ao('coco') == 'caca'"] }
+      },
+      {
+        titre: "Liste de mots triée",
+        consigne: "Leçon 2 - Ex 6 : Une fonction <code>trier_mots(phrase)</code> qui prend une phrase, sépare les mots, les trie par ordre alphabétique et retourne la liste.",
+        code: "def trier_mots(phrase):\n    # Utilisez split() et sort()\n    return []",
+        validation: { type: "function", tests: ["assert trier_mots('le dernier exercice') == ['dernier', 'exercice', 'le']"] }
+      },
+
+      // --- LEÇON 3 : Conditions ---
+      {
+        titre: "Pythagore",
+        consigne: "Leçon 3 - Ex 3 : Écrire une fonction <code>est_rectangle(a, b, c)</code> (où c est la plus grande longueur) qui retourne True si le triangle est rectangle.",
+        code: "def est_rectangle(a, b, c):\n    # Vérifier a² + b² == c²\n    return False",
+        validation: { type: "function", tests: ["assert est_rectangle(3, 4, 5) == True", "assert est_rectangle(1, 1, 2) == False"] }
+      },
+      {
+        titre: "Anagrammes",
+        consigne: "Leçon 3 - Ex 4 : Vérifier si deux mots sont des anagrammes (contiennent les mêmes lettres). Utilisez <code>sorted()</code> et <code>list()</code>.",
+        code: "def sont_anagrammes(mot1, mot2):\n    # Comparez les listes triées des lettres\n    return False",
+        validation: { type: "function", tests: ["assert sont_anagrammes('chien', 'niche') == True", "assert sont_anagrammes('gare', 'rage') == True", "assert sont_anagrammes('bonjour', 'aurevoir') == False"] }
+      },
+
+      // --- LEÇON 4 : Boucle For ---
+      {
+        titre: "Table de 5",
+        consigne: "Leçon 4 - Ex 2 : Retourner une liste contenant la table de multiplication de 5 de 0 à 9 : [0, 5, 10... 45].",
+        code: "def table_de_cinq():\n    resultats = []\n    for i in range(10):\n        # Ajouter i*5 à la liste\n        pass\n    return resultats",
+        validation: { type: "function", tests: ["assert table_de_cinq() == [0, 5, 10, 15, 20, 25, 30, 35, 40, 45]"] }
+      },
+      {
+        titre: "Somme des carrés",
+        consigne: "Leçon 4 - Ex 3.4 : Calculer la somme des carrés des entiers compris entre 242 et 424 (inclus).",
+        code: "def somme_carres_intervalle():\n    somme = 0\n    # Boucle range(242, 425)\n    return somme",
+        validation: { type: "function", tests: ["assert somme_carres_intervalle() == 20875669"] } // J'ai pré-calculé la valeur
+      },
+      {
+        titre: "Pyramide d'oranges",
+        consigne: "Leçon 4 - Ex 3.5 : Une pyramide à base carrée a 1 orange en haut, 4 en dessous (2x2), 9 en dessous (3x3)... Combien d'oranges pour 125 étages ?",
+        code: "def pyramide_oranges(etages):\n    total = 0\n    # Somme des k*k pour k allant de 1 à etages\n    return total",
+        validation: { type: "function", tests: ["assert pyramide_oranges(125) == 658875", "assert pyramide_oranges(3) == 14"] }
+      },
+      {
+        titre: "Simulation Dés (Somme 12)",
+        consigne: "Leçon 4 - Ex 4 : Simuler 1000 lancers de 2 dés (6 faces). Retourner le nombre de fois où la somme fait 12 (double 6).",
+        code: "from random import randint\ndef simule_double_six():\n    compteur = 0\n    for i in range(1000):\n        d1 = randint(1, 6)\n        d2 = randint(1, 6)\n        # Si somme fait 12, on incrémente\n    return compteur",
+        validation: { type: "manual", hint: "La valeur retournée doit être proche de 27 ou 28 (car 1000/36 ≈ 27.7)." }
+      },
+
+      // --- LEÇON 5 : Boucle While ---
+      {
+        titre: "Division par soustraction",
+        consigne: "Leçon 5 - Ex 1 : Écrire une fonction qui effectue la division euclidienne de a par b (retourne le quotient) en utilisant uniquement des soustractions (boucle while).",
+        code: "def quotient_soustraction(a, b):\n    q = 0\n    while a >= b:\n        # Soustraire b à a\n        # Incrémenter q\n        pass\n    return q",
+        validation: { type: "function", tests: ["assert quotient_soustraction(666, 42) == 15", "assert quotient_soustraction(100, 10) == 10"] }
+      },
+      {
+        titre: "Vol de Syracuse",
+        consigne: "Leçon 5 - Ex 2 : Calculer le 'temps de vol' (nombre d'étapes) pour arriver à 1 en partant d'un entier n. (Si pair n/2, si impair 3n+1).",
+        code: "def temps_vol_syracuse(n):\n    etapes = 0\n    while n != 1:\n        if n % 2 == 0:\n            n = n // 2\n        else:\n            n = 3 * n + 1\n        etapes += 1\n    return etapes",
+        validation: { type: "function", tests: ["assert temps_vol_syracuse(13) == 9", "assert temps_vol_syracuse(63) == 107"] }
+      },
+      {
+        titre: "Approximation Racine de 2",
+        consigne: "Leçon 5 - Ex 3 : Trouver la plus petite valeur `r` (avec un pas de 0.001) telle que `r*r > 2`. Commencer à r=1.",
+        code: "def approx_racine():\n    r = 1.0\n    # while r**2 < 2 ...\n    return round(r, 3)",
+        validation: { type: "function", tests: ["assert approx_racine() == 1.415"] } // 1.414² < 2, mais le pas fait passer juste au dessus
+      },
+      {
+        titre: "Doublement population",
+        consigne: "Leçon 5 - Ex 4 : Une ville a 80 000 hab. et augmente de 2% par an. Au bout de combien d'années la population aura-t-elle doublé (> 160 000) ?",
+        code: "def annees_doublement():\n    p = 80000\n    annee = 0\n    while p < 160000:\n        p = p * 1.02\n        annee += 1\n    return annee",
+        validation: { type: "function", tests: ["assert annees_doublement() == 36"] }
+      },
+      {
+        titre: "Dichotomie",
+        consigne: "Leçon 5 - Ex 6 : Résoudre x² - x - 1 = 0 sur [1, 2] par dichotomie. Retourner la borne inférieure de l'intervalle final quand l'écart est < 0.0001.",
+        code: "def resolution_dichotomie():\n    a, b = 1.0, 2.0\n    while (b - a) > 0.0001:\n        c = (a + b) / 2\n        if c**2 - c - 1 > 0:\n            b = c\n        else:\n            a = c\n    return a",
+        validation: { type: "function", tests: ["assert abs(resolution_dichotomie() - 1.618) < 0.001"] }
+      },
+
+      // --- LEÇON 6 : Fonctions ---
+      {
+        titre: "Coordonnées Milieu",
+        consigne: "Leçon 6 - Ex 2 : Écrire une fonction <code>milieu(xa, ya, xb, yb)</code> qui retourne un tuple (xI, yI).",
+        code: "def milieu(xa, ya, xb, yb):\n    # Moyenne des x, moyenne des y\n    return (0, 0)",
+        validation: { type: "function", tests: ["assert milieu(0,0, 10,10) == (5.0, 5.0)", "assert milieu(2,4, 6,8) == (4.0, 6.0)"] }
+      },
+      {
+        titre: "Distance Euclidienne",
+        consigne: "Leçon 6 - Ex 3 : Écrire une fonction <code>distance(xa, ya, xb, yb)</code>. Formule : $\\sqrt{(x_b-x_a)^2 + (y_b-y_a)^2}$.",
+        code: "from math import sqrt\ndef distance(xa, ya, xb, yb):\n    return 0",
+        validation: { type: "function", tests: ["assert distance(0,0, 3,4) == 5.0", "assert abs(distance(1,1, 2,2) - 1.414) < 0.01"] }
+      },
+      {
+        titre: "Factorielle Récursive",
+        consigne: "Leçon 6 - Ex 5 : Implémenter la factorielle de façon récursive (la fonction s'appelle elle-même).",
+        code: "def factorielle(n):\n    if n < 2:\n        return 1\n    else:\n        # n * factorielle de n-1\n        return 1",
+        validation: { type: "function", tests: ["assert factorielle(5) == 120", "assert factorielle(0) == 1"] }
+      },
+      {
+        titre: "Suite de Fibonacci",
+        consigne: "Leçon 6 - Ex 6 : Calculer le n-ième terme de Fibonacci (où u0=0, u1=1, u_n = u_{n-1} + u_{n-2}).",
+        code: "def fibo(n):\n    a, b = 0, 1\n    for i in range(n):\n        a, b = b, a + b\n    return a",
+        validation: { type: "function", tests: ["assert fibo(5) == 5", "assert fibo(10) == 55"] }
+      },
+
+      // --- LEÇON 7 : Listes ---
+      {
+        titre: "Compréhension de liste",
+        consigne: "Leçon 7 - Ex 4 : Créer la liste des entiers pairs multipliés par 2, pour k allant de 0 à 9, en une ligne.",
+        code: "def liste_pairs_double():\n    # [2*k for k in ...]\n    # Attention, l'exo demande 'Pairs' où Pairs = 2*k. \n    # Simplifions : retournez [0, 2, 4 ... 18]\n    return [2*k for k in range(10)]",
+        validation: { type: "function", tests: ["assert liste_pairs_double() == [0, 2, 4, 6, 8, 10, 12, 14, 16, 18]"] }
+      },
+      {
+        titre: "Différence de listes",
+        consigne: "Leçon 7 - Ex 5 : Retourner une liste contenant les éléments de liste1 qui ne sont PAS dans liste2.",
+        code: "def difference_listes(liste1, liste2):\n    # Utilisez une compréhension de liste avec 'if k not in ...'\n    return []",
+        validation: { type: "function", tests: ["assert difference_listes([1,2,3,4], [2,4]) == [1, 3]", "assert difference_listes(['a','b'], ['b']) == ['a']"] }
+      },
+
+    ];
+
+    // ==========================================
+    // LOGIQUE DE L'APPLICATION
+    // ==========================================
+    let editor, pyodide;
+    let currentIdx = 0;
+    const outputDiv = document.getElementById("output");
+    const statusDiv = document.getElementById("status");
+    const runBtn = document.getElementById("runBtn");
+
+    // Initialisation Ace Editor
+    editor = ace.edit("editor");
+    editor.setTheme("ace/theme/tomorrow_night_eighties"); // Thème sombre
+    editor.session.setMode("ace/mode/python");
+    editor.setFontSize(16);
+
+    // Initialisation Pyodide
+    async function initPyodide() {
+      try {
+        pyodide = await loadPyodide();
+        outputDiv.innerText = "Environnement Python prêt. Cliquez sur 'Exécuter'.\n";
+        runBtn.disabled = false;
+        document.getElementById("progressText").innerText = `Prêt`;
+        loadExercise(0);
+      } catch (err) {
+        outputDiv.innerText = "Erreur de chargement de Python. Vérifiez votre connexion.\n" + err;
+      }
+    }
+    initPyodide();
+
+    function loadExercise(index) {
+      currentIdx = index;
+      const ex = exercices[index];
+
+      document.getElementById("exTitle").innerText = `${index + 1}. ${ex.titre}`;
+      document.getElementById("exInstruction").innerHTML = ex.consigne;
+      document.getElementById("progressText").innerText = `Exercice ${index + 1} / ${exercices.length}`;
+
+      editor.setValue(ex.code, -1);
+
+      outputDiv.innerText = "";
+      statusDiv.style.display = "none";
+      statusDiv.className = "status-msg";
+
+      // Navigation state
+      document.getElementById("btnPrev").disabled = (index === 0);
+      document.getElementById("btnNext").disabled = (index === exercices.length - 1);
+    }
+
+    async function runCode() {
+      const ex = exercices[currentIdx];
+      const userCode = editor.getValue();
+
+      outputDiv.innerText = "";
+      statusDiv.style.display = "none";
+      runBtn.disabled = true;
+      runBtn.innerHTML = '<span class="loader"></span> ...';
+
+      // Capture stdout
+      pyodide.setStdout({ batched: (msg) => outputDiv.innerText += msg + "\n" });
+
+      try {
+        // 1. Exécution du code utilisateur
+        await pyodide.runPythonAsync(userCode);
+
+        // 2. Validation
+        let success = false;
+        let message = "";
+
+        if (ex.validation.type === "manual") {
+          statusDiv.className = "status-msg success";
+          statusDiv.innerHTML = `⚠️ <strong>Validation manuelle :</strong><br>${ex.validation.hint}`;
+          statusDiv.style.display = "block";
+          resetBtnState();
+          return;
+        }
+
+        if (ex.validation.type === "output_list") {
+          const userLines = outputDiv.innerText.trim().split('\n').map(s => s.trim()).filter(s => s !== "");
+          const expected = ex.validation.values;
+          success = (userLines.length === expected.length) &&
+            userLines.every((val, index) => val == expected[index]);
+          if (!success) message = `Sortie attendue : ${expected.slice(0, 5).join(", ")}... <br> Obtenue : ${userLines.slice(0, 5).join(", ")}...`;
+        }
+        else if (ex.validation.type === "output_includes") {
+          const content = outputDiv.innerText;
+          success = ex.validation.values.every(val => content.includes(val));
+          if (!success) message = "Votre affichage ne contient pas toutes les valeurs attendues.";
+        }
+        else if (ex.validation.type === "function") {
+          try {
+            for (let test of ex.validation.tests) {
+              await pyodide.runPythonAsync(test);
+            }
+            success = true;
+          } catch (e) {
+            success = false;
+            message = "La fonction ne retourne pas le bon résultat pour tous les cas de test.";
+          }
+        }
+
+        // Affichage Résultat
+        statusDiv.style.display = "block";
+        if (success) {
+          statusDiv.className = "status-msg success";
+          statusDiv.innerHTML = "✅ Bravo ! Exercice validé.";
+        } else {
+          statusDiv.className = "status-msg error";
+          statusDiv.innerHTML = `❌ Incorrect.<br><small>${message}</small>`;
+        }
+
+      } catch (err) {
+        outputDiv.innerText += "\n🛑 Erreur Python :\n" + err;
+        statusDiv.style.display = "block";
+        statusDiv.className = "status-msg error";
+        statusDiv.innerHTML = "Votre code contient une erreur de syntaxe ou d'exécution.";
+      }
+
+      resetBtnState();
+    }
+
+    function resetBtnState() {
+      runBtn.disabled = false;
+      runBtn.innerHTML = '<span id="btnIcon">▶</span> Exécuter';
+    }
+
+    function resetCode() {
+      if (confirm("Voulez-vous vraiment remettre le code à zéro ?")) {
+        editor.setValue(exercices[currentIdx].code, -1);
+        outputDiv.innerText = "";
+        statusDiv.style.display = "none";
+      }
+    }
+
+    function nextExercise() { if (currentIdx < exercices.length - 1) loadExercise(currentIdx + 1); }
+    function prevExercise() { if (currentIdx > 0) loadExercise(currentIdx - 1); }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LearnPython - Exercices interactifs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      background-color: #0F172A;
+      color: #F8FAFC;
+    }
+
+    h1,
+    h2,
+    h3 {
+      font-family: 'Poppins', sans-serif;
+    }
+
+    /* Hero particles */
+    #particles {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Floating illustration */
+    .float {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-15px);
+      }
+    }
+
+    /* Button hover glow */
+    .btn-glow:hover {
+      box-shadow: 0 0 12px #22D3EE, 0 0 24px #7F5AF0;
+      transform: scale(1.05);
+    }
+
+    .transition-smooth {
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* Simple fade-in for features */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Particles Canvas -->
+  <canvas id="particles"></canvas>
+
+  <!-- Header -->
+  <header class="flex justify-between items-center p-6 max-w-7xl mx-auto relative z-10">
+    <div class="flex items-center space-x-2">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/c/c3/Python-logo-notext.svg" alt="Logo"
+        class="w-10 h-10">
+      <span class="text-2xl font-bold text-[#7F5AF0]">LearnPython</span>
+    </div>
+    <nav class="space-x-6 text-[#F8FAFC] font-medium">
+      <a href="#" class="hover:text-[#22D3EE] transition">Accueil</a>
+      <a href="#" class="hover:text-[#22D3EE] transition">Cours</a>
+      <a href="#" class="hover:text-[#22D3EE] transition">Exercices</a>
+      <a href="#" class="hover:text-[#22D3EE] transition">Communauté</a>
+      <a href="#" class="hover:text-[#22D3EE] transition">À propos</a>
+    </nav>
+    <a href="#" class="ml-6 px-6 py-2 bg-[#7F5AF0] rounded-lg font-semibold btn-glow transition-smooth">Commencer</a>
+  </header>
+
+  <!-- Hero Section -->
+  <section
+    class="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-6 mt-12 md:mt-20 relative z-10">
+    <div class="md:w-1/2 space-y-6">
+      <h1 class="text-4xl md:text-5xl font-bold">Apprenez Python de manière interactive</h1>
+      <p class="text-[#CBD5E1] text-lg md:text-xl">Des exercices pratiques, des défis et un apprentissage ludique pour
+        maîtriser le langage Python.</p>
+      <a href="#"
+        class="inline-block px-8 py-3 bg-[#22D3EE] rounded-lg font-semibold btn-glow transition-smooth">Commencer
+        maintenant</a>
+    </div>
+    <div class="md:w-1/2 mt-10 md:mt-0">
+      <img
+        src="https://img.freepik.com/vecteurs-libre/developpement-web-programmeur-ecran-ordinateur-code-logiciel-illustration-plate_1150-46908.jpg?w=740"
+        alt="Programmation Python" class="rounded-xl shadow-xl float" loading="lazy">
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="max-w-7xl mx-auto px-6 mt-20 grid grid-cols-1 md:grid-cols-4 gap-8 text-center relative z-10">
+    <div class="bg-[#1E293B] p-6 rounded-xl shadow hover:shadow-lg transition fade-in">
+      <img src="https://img.icons8.com/ios-filled/50/7F5AF0/code.png" class="mx-auto mb-4" loading="lazy">
+      <h3 class="font-semibold text-xl mb-2">Exercices interactifs</h3>
+      <p class="text-[#CBD5E1]">Apprenez en pratiquant avec des exercices adaptés à votre niveau.</p>
+    </div>
+    <div class="bg-[#1E293B] p-6 rounded-xl shadow hover:shadow-lg transition fade-in">
+      <img src="https://img.icons8.com/ios-filled/50/7F5AF0/line-chart.png" class="mx-auto mb-4" loading="lazy">
+      <h3 class="font-semibold text-xl mb-2">Suivi de progression</h3>
+      <p class="text-[#CBD5E1]">Visualisez votre évolution et vos compétences acquises.</p>
+    </div>
+    <div class="bg-[#1E293B] p-6 rounded-xl shadow hover:shadow-lg transition fade-in">
+      <img src="https://img.icons8.com/ios-filled/50/7F5AF0/trophy.png" class="mx-auto mb-4" loading="lazy">
+      <h3 class="font-semibold text-xl mb-2">Défis et projets</h3>
+      <p class="text-[#CBD5E1]">Relevez des challenges pour consolider vos acquis.</p>
+    </div>
+    <div class="bg-[#1E293B] p-6 rounded-xl shadow hover:shadow-lg transition fade-in">
+      <img src="https://img.icons8.com/ios-filled/50/7F5AF0/conference-call.png" class="mx-auto mb-4" loading="lazy">
+      <h3 class="font-semibold text-xl mb-2">Communauté</h3>
+      <p class="text-[#CBD5E1]">Partagez vos réussites et apprenez avec d’autres passionnés.</p>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="max-w-7xl mx-auto px-6 mt-20 grid grid-cols-1 md:grid-cols-3 gap-8 text-center relative z-10">
+    <div>
+      <h2 class="text-4xl font-bold text-[#7F5AF0]">5000+</h2>
+      <p class="text-[#CBD5E1] mt-2">Étudiants formés</p>
+    </div>
+    <div>
+      <h2 class="text-4xl font-bold text-[#7F5AF0]">1200+</h2>
+      <p class="text-[#CBD5E1] mt-2">Exercices interactifs</p>
+    </div>
+    <div>
+      <h2 class="text-4xl font-bold text-[#7F5AF0]">4.8/5</h2>
+      <p class="text-[#CBD5E1] mt-2">Note moyenne</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="mt-20 bg-[#1E293B] py-10 relative z-10">
+    <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+      <p class="text-[#CBD5E1]">&copy; 2025 LearnPython. Tous droits réservés.</p>
+      <div class="space-x-6">
+        <a href="#" class="hover:text-[#22D3EE] transition">Cours</a>
+        <a href="#" class="hover:text-[#22D3EE] transition">Exercices</a>
+        <a href="#" class="hover:text-[#22D3EE] transition">FAQ</a>
+        <a href="#" class="hover:text-[#22D3EE] transition">Contact</a>
+      </div>
+      <div class="flex space-x-4">
+        <a href="#" class="hover:text-[#22D3EE] transition">GitHub</a>
+        <a href="#" class="hover:text-[#22D3EE] transition">Twitter</a>
+        <a href="#" class="hover:text-[#22D3EE] transition">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Particles JS -->
+  <script>
+    const canvas = document.getElementById('particles');
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = window.innerWidth;
+    let h = canvas.height = window.innerHeight;
+    const particlesArray = [];
+
+    window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; });
+
+    class Particle {
+      constructor() {
+        this.x = Math.random() * w;
+        this.y = Math.random() * h;
+        this.radius = Math.random() * 2 + 1;
+        this.speedX = (Math.random() - 0.5) * 0.3;
+        this.speedY = (Math.random() - 0.5) * 0.3;
+      }
+      update() {
+        this.x += this.speedX; this.y += this.speedY;
+        if (this.x < 0 || this.x > w) this.speedX = -this.speedX;
+        if (this.y < 0 || this.y > h) this.speedY = -this.speedY;
+      }
+      draw() {
+        ctx.fillStyle = '#7F5AF0';
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    for (let i = 0; i < 50; i++) particlesArray.push(new Particle());
+
+    function animate() { ctx.clearRect(0, 0, w, h); particlesArray.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); }
+    animate();
+
+    // Intersection Observer for fade-in
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); } });
+    }, { threshold: 0.2 });
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+
+</html>
