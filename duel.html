@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Duel Python (Pyodide) - LearnPython</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@300;400;600&family=JetBrains+Mono&display=swap"
+    rel="stylesheet">
+
+  <script src="https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"></script>
+
+  <style>
+    :root {
+      --bg-deep: #050810;
+      --cyan: #22D3EE;
+      --purple: #7F5AF0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-deep);
+      color: #F8FAFC;
+      overflow-x: hidden;
+    }
+
+    h1,
+    .font-display {
+      font-family: 'Archivo Black', sans-serif;
+    }
+
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+    }
+
+    .text-gradient {
+      background: linear-gradient(135deg, #fff 30%, var(--cyan) 70%, var(--purple) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Style pour l'éditeur */
+    #editor {
+      background: transparent;
+      color: var(--cyan);
+      caret-color: white;
+    }
+  </style>
+</head>
+
+<body class="p-4 md:p-8">
+
+  <main class="max-w-6xl mx-auto space-y-6">
+    <div class="flex justify-between items-center mb-10">
+      <a href="index.html" class="font-display text-xl text-gradient">← LearnPython</a>
+      <div id="duel-status"
+        class="px-4 py-1 rounded-full border border-purple-500/30 text-purple-400 text-xs font-bold transition-all">
+        INITIALISATION DE PYTHON...
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+      <div class="md:col-span-4 space-y-6">
+        <div class="glass-card p-6 border-l-4 border-l-cyan-500">
+          <h1 id="display-title" class="font-display text-2xl mb-4 text-white uppercase italic">Chargement...</h1>
+          <p id="display-desc" class="text-slate-400 text-sm leading-relaxed">Lecture du défi en cours...</p>
+        </div>
+
+        <div class="glass-card p-6 bg-black/40 border border-white/5 shadow-inner">
+          <p class="text-xs font-mono text-slate-500 uppercase tracking-tighter mb-2">Console / Output</p>
+          <pre id="output"
+            class="text-sm font-mono text-emerald-400 h-48 overflow-y-auto whitespace-pre-wrap">En attente d'exécution...</pre>
+        </div>
+      </div>
+
+      <div class="md:col-span-8 glass-card p-1 overflow-hidden relative">
+        <div class="bg-white/5 px-6 py-3 border-b border-white/10 flex items-center justify-between">
+          <span class="text-xs font-mono text-slate-400 flex items-center">
+            <span class="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
+            main.py
+          </span>
+          <button id="run-btn" disabled onclick="runPython()"
+            class="bg-cyan-500 text-black px-8 py-2 rounded-xl font-bold text-sm hover:scale-105 active:scale-95 transition-all opacity-50 cursor-not-allowed">
+            EXÉCUTER LE CODE
+          </button>
+        </div>
+        <textarea id="editor" spellcheck="false"
+          class="w-full h-[450px] p-8 font-mono text-lg outline-none resize-none"></textarea>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    let pyodide;
+    const outputElement = document.getElementById("output");
+
+    // 1. Initialisation de Pyodide au chargement
+    async function initPyodide() {
+      try {
+        pyodide = await loadPyodide();
+        document.getElementById('duel-status').innerText = "PYTHON PRÊT";
+        document.getElementById('duel-status').className = "px-4 py-1 rounded-full border border-green-500/30 text-green-400 text-xs font-bold";
+        document.getElementById('run-btn').disabled = false;
+        document.getElementById('run-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+      } catch (err) {
+        outputElement.innerText = "Erreur d'initialisation : " + err;
+      }
+    }
+    initPyodide();
+
+    // 2. Décodage du lien de défi
+    window.onload = function () {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('challenge')) {
+        try {
+          const encodedData = params.get('challenge');
+          const decodedData = JSON.parse(decodeURIComponent(escape(atob(encodedData))));
+
+          document.getElementById('display-title').innerText = decodedData.t;
+          document.getElementById('display-desc').innerText = decodedData.d;
+          document.getElementById('editor').value = decodedData.c;
+        } catch (e) {
+          document.getElementById('display-title').innerText = "Lien Invalide";
+        }
+      }
+    };
+
+    // 3. Exécution du code
+    async function runPython() {
+      const code = document.getElementById("editor").value;
+      const status = document.getElementById('duel-status');
+      outputElement.innerText = ""; // Clear console
+
+      // Redirection des prints de Python vers notre div HTML
+      pyodide.setStdout({
+        batched: (str) => {
+          outputElement.innerText += str + "\n";
+        }
+      });
+
+      try {
+        // 1. Exécuter le code de l'élève
+        await pyodide.runPythonAsync(code);
+
+        // 2. Récupérer les données du défi décodées plus tôt
+        const params = new URLSearchParams(window.location.search);
+        const decodedData = JSON.parse(decodeURIComponent(escape(atob(params.get('challenge')))));
+
+        // 3. Si une validation est prévue, on la lance
+        if (decodedData.f && decodedData.e) {
+          // On appelle la fonction de l'élève en Python et on récupère le résultat
+          const result = await pyodide.runPythonAsync(`${decodedData.f}()`);
+
+          if (result.toString() === decodedData.e.toString()) {
+            // VICTOIRE !
+            status.innerText = "DÉFI RÉUSSI ! ✅";
+            status.className = "px-4 py-1 rounded-full bg-green-500 text-white text-xs font-bold animate-bounce";
+            outputElement.innerHTML += `<br><span class="text-green-400 font-bold">Félicitations ! Ta fonction a bien retourné ${result}.</span>`;
+          } else {
+            // ÉCHEC
+            status.innerText = "MAUVAISE RÉPONSE ❌";
+            status.className = "px-4 py-1 rounded-full bg-red-500 text-white text-xs font-bold";
+            outputElement.innerHTML += `<br><span class="text-red-400">Erreur : Ta fonction a retourné ${result} au lieu de ${decodedData.e}.</span>`;
+          }
+        } else {
+          status.innerText = "CODE EXÉCUTÉ";
+        }
+      } catch (err) {
+        outputElement.innerHTML += `<span style="color:#f87171">${err}</span>`;
+      }
+    }
+  </script>
+</body>
+
+</html>

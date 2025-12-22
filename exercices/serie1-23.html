@@ -7,6 +7,7 @@
   <title>Exercices Python Interactifs</title>
   <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.32.7/ace.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     :root {
       --primary: #3a7bd5;
@@ -219,6 +220,13 @@
         transform: rotate(360deg);
       }
     }
+
+    /* Ajoute ceci dans ton <style> */
+    .warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeeba;
+    }
   </style>
 </head>
 
@@ -226,8 +234,14 @@
 
   <div class="main-container">
     <div class="header">
-      <h1>🐍 Python : Exercices Interactifs</h1>
-      <span class="progress-badge" id="progressText">Chargement...</span>
+      <h1>🐍 Python : Exercices & Suivi</h1>
+      <div style="display: flex; gap: 15px; align-items: center;">
+        <span class="progress-badge" id="progressText">Chargement...</span>
+        <button id="authBtn" onclick="toggleAuth()"
+          style="background:white; color:#3a7bd5; border:none; font-size:0.9rem; padding: 5px 15px;">
+          Connexion Google
+        </button>
+      </div>
     </div>
 
     <div class="content">
@@ -245,7 +259,11 @@
           <button class="btn-run" onclick="runCode()" id="runBtn" disabled>
             <span id="btnIcon">▶</span> Exécuter
           </button>
+          <button class="btn-nav" onclick="showHint()" style="background:#17a2b8;">💡 Indice</button>
           <button class="btn-reset" onclick="resetCode()">↺ Réinitialiser</button>
+        </div>
+        <div class="btn-group">
+          <button onclick="giveUp()" style="background-color: #dc3545; color: white;">🏳️ J'abandonne</button>
         </div>
         <div class="btn-group">
           <button class="btn-nav" onclick="prevExercise()" id="btnPrev">← Précédent</button>
@@ -261,7 +279,111 @@
     </div>
   </div>
 
-  <script>
+  <script type="module">
+    // ----------------------------------------------------
+    // 1. CONFIGURATION FIREBASE (REMPLACE CECI !)
+    // ----------------------------------------------------
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, arrayUnion } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // COLLE TES CLÉS ICI (Celles de l'étape 4)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBGzMQwqbE1yPgoMfxvhgIeX7Qo0wBVJc4",
+      authDomain: "learnpython-1d8d0.firebaseapp.com",
+      projectId: "learnpython-1d8d0",
+      storageBucket: "learnpython-1d8d0.firebasestorage.app",
+      messagingSenderId: "975177947496",
+      appId: "1:975177947496:web:30410a3f24860816bc5edd"
+    };
+
+    // Initialisation
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const provider = new GoogleAuthProvider();
+
+    let currentUser = null;
+    let userProgress = []; // Liste des ID d'exos réussis (ex: [0, 2, 5])
+
+    // ----------------------------------------------------
+    // 2. GESTION CONNEXION
+    // ----------------------------------------------------
+
+    // Fonction globale pour le bouton HTML
+    window.toggleAuth = async () => {
+      if (currentUser) {
+        await signOut(auth);
+      } else {
+        try {
+          await signInWithPopup(auth, provider);
+        } catch (error) {
+          console.error("Erreur auth:", error);
+          alert("Erreur de connexion : " + error.message);
+        }
+      }
+    };
+
+    // Surveiller l'état de connexion
+    onAuthStateChanged(auth, async (user) => {
+      const btn = document.getElementById("authBtn");
+      if (user) {
+        currentUser = user;
+        btn.innerText = "Déconnexion (" + user.displayName.split(" ")[0] + ")";
+        // Charger la progression depuis la base de données
+        await loadProgress();
+      } else {
+        currentUser = null;
+        userProgress = [];
+        btn.innerText = "Connexion Google";
+      }
+      updateUI(); // Mettre à jour l'affichage (cadenas, checkmarks...)
+    });
+
+    async function loadProgress() {
+      if (!currentUser) return;
+      const userRef = doc(db, "users", currentUser.uid);
+      try {
+        const docSnap = await getDoc(userRef);
+        if (docSnap.exists()) {
+          userProgress = docSnap.data().completed || [];
+        } else {
+          // Créer le profil s'il n'existe pas
+          await setDoc(userRef, { completed: [], email: currentUser.email });
+        }
+        updateUI();
+      } catch (e) {
+        console.error("Erreur chargement:", e);
+      }
+    }
+
+    async function saveSuccess(exIndex) {
+      if (!currentUser) return; // Pas de sauvegarde si pas connecté
+
+      // Si pas déjà validé
+      if (!userProgress.includes(exIndex)) {
+        userProgress.push(exIndex);
+
+        // Envoi à Firebase
+        const userRef = doc(db, "users", currentUser.uid);
+        try {
+          await updateDoc(userRef, {
+            completed: arrayUnion(exIndex)
+          });
+          console.log("Sauvegarde réussie !");
+          updateUI();
+        } catch (e) {
+          console.error("Erreur sauvegarde:", e);
+        }
+      }
+    }
+
+    // ----------------------------------------------------
+    // 3. LOGIQUE DU SITE (Exercices)
+    // ----------------------------------------------------
+
+    // --- ICI : Colle ta liste d'exercices (const exercices = [...]) ---
+    // (Je remets juste un exemple pour que le code soit valide, remplace par ta grande liste)
     // ==========================================
     // DONNÉES DES EXERCICES (100% Fonctions / Sans Input)
     // ==========================================
@@ -270,7 +392,9 @@
         titre: "Multiples de 3",
         consigne: "Écrire une boucle qui affiche les multiples de 3 entre 1 et 50 (3, 6, 9...). Un nombre par ligne.",
         code: "for i in range(1, 51):\n    # Votre code ici",
-        validation: { type: "output_list", values: ["3", "6", "9", "12", "15", "18", "21", "24", "27", "30", "33", "36", "39", "42", "45", "48"] }
+        validation: { type: "output_list", values: ["3", "6", "9", "12", "15", "18", "21", "24", "27", "30", "33", "36", "39", "42", "45", "48"] },
+        //indice: "Utilise range(start, stop, step). Le pas doit être de 3.",
+        solution: "for i in range(1, 51):\n    if i % 3 == 0:\n        print(i)",
       },
       {
         titre: "Somme des cubes",
@@ -312,7 +436,8 @@
         titre: "Compter les mots",
         consigne: "Écrire une fonction <code>compter_mots(phrase)</code> qui retourne le nombre de mots (séparés par des espaces).",
         code: "def compter_mots(phrase):\n    # Indice: utilisez split()\n    return 0",
-        validation: { type: "function", tests: ["assert compter_mots('Bonjour le monde') == 3", "assert compter_mots('Un') == 1"] }
+        validation: { type: "function", tests: ["assert compter_mots('Bonjour le monde') == 3", "assert compter_mots('Un') == 1"] },
+        solution: "def compter_mots(phrase):\n    mots = phrase.split()\n    return len(mots)",
       },
       {
         titre: "Palindrome",
@@ -406,149 +531,185 @@
       }
     ];
 
-    // ==========================================
-    // LOGIQUE DE L'APPLICATION
-    // ==========================================
+    window.showHint = () => {
+      const ex = exercices[currentIdx];
+      if (ex.indice) {
+        alert("💡 Indice :\n" + ex.indice);
+      } else {
+        alert("Pas d'indice pour cet exercice, courage !");
+      }
+    };
+
+    // Fonction pour afficher la solution
+    window.giveUp = () => {
+      const ex = exercices[currentIdx];
+
+      if (!ex.solution) {
+        alert("Pas de solution disponible pour cet exercice.");
+        return;
+      }
+
+      if (confirm("⚠️ Attention !\nSi vous affichez la solution, cet exercice ne rapportera aucun point.\n\nVoulez-vous continuer ?")) {
+        // 1. On marque l'exercice comme abandonné
+        abandonedExercises.add(currentIdx);
+
+        // 2. On affiche la solution
+        editor.setValue(ex.solution, -1);
+
+        // 3. On informe l'utilisateur
+        const statusDiv = document.getElementById("status");
+        statusDiv.style.display = "block";
+        statusDiv.className = "status-msg warning";
+        statusDiv.innerHTML = "👀 <strong>Mode Solution :</strong> Vous pouvez exécuter le code pour comprendre, mais la validation est désactivée.";
+      }
+    };
+
     let editor, pyodide;
     let currentIdx = 0;
+    // NOUVEAU : On stocke les index des exercices abandonnés (ex: {1, 4})
+    let abandonedExercises = new Set();
     const outputDiv = document.getElementById("output");
     const statusDiv = document.getElementById("status");
     const runBtn = document.getElementById("runBtn");
 
-    // Initialisation Ace Editor
+    // Init Ace & Pyodide
     editor = ace.edit("editor");
     editor.setTheme("ace/theme/tomorrow_night_bright");
     editor.session.setMode("ace/mode/python");
     editor.setFontSize(16);
 
-    // Initialisation Pyodide
     async function initPyodide() {
       try {
         pyodide = await loadPyodide();
-        outputDiv.innerText = "Environnement Python prêt. Cliquez sur 'Exécuter'.\n";
+        outputDiv.innerText = "Prêt. Connectez-vous pour sauvegarder votre progression !";
         runBtn.disabled = false;
-        document.getElementById("progressText").innerText = `Prêt`;
         loadExercise(0);
-      } catch (err) {
-        outputDiv.innerText = "Erreur de chargement de Python. Vérifiez votre connexion.\n" + err;
-      }
+      } catch (err) { outputDiv.innerText = "Erreur Python: " + err; }
     }
     initPyodide();
 
-    function loadExercise(index) {
-      currentIdx = index;
-      const ex = exercices[index];
-
-      document.getElementById("exTitle").innerText = `${index + 1}. ${ex.titre}`;
-      document.getElementById("exInstruction").innerHTML = ex.consigne;
-      document.getElementById("progressText").innerText = `Exercice ${index + 1} / ${exercices.length}`;
-
-      editor.setValue(ex.code, -1);
-
-      outputDiv.innerText = "";
-      statusDiv.style.display = "none";
-      statusDiv.className = "status-msg";
-
-      // Navigation state
-      document.getElementById("btnPrev").disabled = (index === 0);
-      document.getElementById("btnNext").disabled = (index === exercices.length - 1);
-    }
-
-    async function runCode() {
+    // Rendre les fonctions accessibles au HTML (car on est dans un module)
+    window.runCode = async () => {
       const ex = exercices[currentIdx];
       const userCode = editor.getValue();
+      const outputDiv = document.getElementById("output");
+      const statusDiv = document.getElementById("status");
 
       outputDiv.innerText = "";
       statusDiv.style.display = "none";
-      runBtn.disabled = true;
-      runBtn.innerHTML = '<span class="loader"></span> ...';
 
-      // Capture stdout
+      // Exécution Python
       pyodide.setStdout({ batched: (msg) => outputDiv.innerText += msg + "\n" });
-
       try {
-        // 1. Exécution du code utilisateur
         await pyodide.runPythonAsync(userCode);
 
-        // 2. Validation
-        let success = false;
-        let message = "";
+        // --- NOUVELLE LOGIQUE DE VÉRIFICATION ---
 
-        if (ex.validation.type === "manual") {
-          statusDiv.className = "status-msg success";
-          statusDiv.style.background = "#fff3cd";
-          statusDiv.style.color = "#856404";
-          statusDiv.style.borderColor = "#ffeeba";
-          statusDiv.innerHTML = `⚠️ <strong>Validation manuelle :</strong><br>${ex.validation.hint}`;
+        // 1. Est-ce que l'élève a abandonné cet exercice ?
+        if (abandonedExercises.has(currentIdx)) {
           statusDiv.style.display = "block";
-          resetBtnState();
+          statusDiv.className = "status-msg warning";
+          statusDiv.innerHTML = "⚠️ <strong>Exercice non comptabilisé.</strong><br>Vous avez utilisé la solution. Passez à l'exercice suivant pour gagner des points !";
+          // IMPORTANT : On fait un RETURN ici. 
+          // Donc le code s'arrête et n'atteindra jamais saveSuccess()
           return;
         }
 
-        if (ex.validation.type === "output_list") {
-          // Vérifie une liste exacte de lignes
-          const userLines = outputDiv.innerText.trim().split('\n').map(s => s.trim()).filter(s => s !== "");
-          const expected = ex.validation.values;
+        // 2. Si pas abandonné, on lance la validation normale
+        let success = await validateExercise(ex);
 
-          success = (userLines.length === expected.length) &&
-            userLines.every((val, index) => val == expected[index]);
-
-          if (!success) message = `Sortie attendue : ${expected.slice(0, 5).join(", ")}... <br> Obtenue : ${userLines.slice(0, 5).join(", ")}...`;
-        }
-        else if (ex.validation.type === "output_includes") {
-          // Vérifie si la sortie CONTIENT les lignes attendues
-          const content = outputDiv.innerText;
-          success = ex.validation.values.every(val => content.includes(val));
-          if (!success) message = "Votre affichage ne contient pas toutes les valeurs attendues.";
-        }
-        else if (ex.validation.type === "function") {
-          // Exécute les assertions
-          try {
-            for (let test of ex.validation.tests) {
-              await pyodide.runPythonAsync(test);
-            }
-            success = true;
-          } catch (e) {
-            success = false;
-            message = "La fonction ne retourne pas le bon résultat pour tous les cas de test.";
-          }
-        }
-
-        // Affichage Résultat
         statusDiv.style.display = "block";
         if (success) {
           statusDiv.className = "status-msg success";
           statusDiv.innerHTML = "✅ Bravo ! Exercice validé.";
+
+          // Effet confetti (si tu l'as ajouté)
+          if (window.confetti) window.confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+          // SAUVEGARDE EN BDD
+          saveSuccess(currentIdx);
+
         } else {
           statusDiv.className = "status-msg error";
-          statusDiv.innerHTML = `❌ Incorrect.<br><small>${message}</small>`;
+          statusDiv.innerHTML = "❌ Résultat incorrect. Essayez encore !";
         }
 
       } catch (err) {
-        outputDiv.innerText += "\n🛑 Erreur Python :\n" + err;
         statusDiv.style.display = "block";
         statusDiv.className = "status-msg error";
-        statusDiv.innerHTML = "Votre code contient une erreur de syntaxe ou d'exécution.";
+        statusDiv.innerHTML = "Erreur Python : " + err;
+      }
+    };
+
+    window.resetCode = () => { if (confirm("Reset ?")) editor.setValue(exercices[currentIdx].code, -1); };
+    window.nextExercise = () => { if (currentIdx < exercices.length - 1) loadExercise(currentIdx + 1); };
+    window.prevExercise = () => { if (currentIdx > 0) loadExercise(currentIdx - 1); };
+
+    function loadExercise(index) {
+      currentIdx = index;
+      const ex = exercices[index];
+      document.getElementById("exTitle").innerText = `${index + 1}. ${ex.titre}`;
+      document.getElementById("exInstruction").innerHTML = ex.consigne;
+      editor.setValue(ex.code, -1);
+      outputDiv.innerText = "";
+      statusDiv.style.display = "none";
+      updateUI();
+    }
+
+    function updateUI() {
+      // 1. Calcul de la progression (texte du haut)
+      const total = exercices.length;
+      const done = userProgress.length; // userProgress vient de Firebase
+      const badge = document.getElementById("progressText");
+
+      if (currentUser) {
+        badge.innerText = `Progression : ${done} / ${total}`;
+      } else {
+        badge.innerText = "Non connecté";
       }
 
-      resetBtnState();
-    }
+      // 2. GESTION DU TITRE (C'est ici qu'on corrige ton problème)
+      const ex = exercices[currentIdx];
+      const titreElement = document.getElementById("exTitle");
 
-    function resetBtnState() {
-      runBtn.disabled = false;
-      runBtn.innerHTML = '<span id="btnIcon">▶</span> Exécuter';
-    }
+      // Base du titre : "1. Nom de l'exo"
+      let titreHTML = `${currentIdx + 1}. ${ex.titre}`;
 
-    function resetCode() {
-      if (confirm("Voulez-vous vraiment remettre le code à zéro ?")) {
-        editor.setValue(exercices[currentIdx].code, -1);
-        outputDiv.innerText = "";
-        statusDiv.style.display = "none";
+      // Cas A : Exercice déjà réussi (Vert)
+      if (userProgress.includes(currentIdx)) {
+        titreHTML += " <span style='color:green'>✅</span>";
       }
+      // Cas B : Exercice abandonné (Orange)
+      else if (abandonedExercises.has(currentIdx)) {
+        titreHTML += " <span style='color:orange; font-size:0.8em'>⚠️ (Abandon)</span>";
+      }
+
+      // Application du titre
+      titreElement.innerHTML = titreHTML;
+
+      // 3. Gestion des boutons Suivant/Précédent
+      document.getElementById("btnPrev").disabled = (currentIdx === 0);
+      document.getElementById("btnNext").disabled = (currentIdx === total - 1);
     }
 
-    function nextExercise() { if (currentIdx < exercices.length - 1) loadExercise(currentIdx + 1); }
-    function prevExercise() { if (currentIdx > 0) loadExercise(currentIdx - 1); }
+    // Logique de validation (Récupérée du script précédent)
+    async function validateExercise(ex) {
+      if (ex.validation.type === "output_list") {
+        const userLines = outputDiv.innerText.trim().split('\n').map(s => s.trim()).filter(s => s !== "");
+        const expected = ex.validation.values;
+        return (userLines.length === expected.length) && userLines.every((val, i) => val == expected[i]);
+      }
+      if (ex.validation.type === "output_includes") {
+        return ex.validation.values.every(val => outputDiv.innerText.includes(val));
+      }
+      if (ex.validation.type === "function") {
+        try {
+          for (let test of ex.validation.tests) await pyodide.runPythonAsync(test);
+          return true;
+        } catch (e) { return false; }
+      }
+      return false;
+    }
   </script>
 </body>
 

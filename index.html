@@ -2,279 +2,371 @@
 <html lang="fr">
 
 <head>
-   
   <meta charset="UTF-8">
-   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LearnPython - Apprenez Python de manière interactive</title>
-   
+  <title>LearnPython - Future of Coding</title>
   <script src="https://cdn.tailwindcss.com"></script>
-   
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Poppins:wght@600;700&display=swap"
-        rel="stylesheet">
-    <style>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@300;400;600&family=JetBrains+Mono&display=swap"
+    rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-deep: #050810;
+      --glass: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --cyan: #22D3EE;
+      --purple: #7F5AF0;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
-      overflow-x: hidden;
-      margin: 0;
-      background: #0F172A;
+      background-color: var(--bg-deep);
       color: #F8FAFC;
+      overflow-x: hidden;
     }
 
     h1,
-    h2,
-    h3 {
-      font-family: 'Poppins', sans-serif;
+    .font-display {
+      font-family: 'Archivo Black', sans-serif;
     }
 
-    /* --- LOGO & MARQUE --- */
-    .brand-text {
-      font-family: 'Poppins', sans-serif;
-      font-size: 2.2rem;
-      /* Beaucoup plus gros */
-      font-weight: 900;
-      /* Extra gras */
-      letter-spacing: -1px;
-      /* Lettres plus serrées pour l'impact */
-
-      /* Effet Dégradé sur le texte */
-      background: linear-gradient(to right, #fff 0%, #22D3EE 50%, #7F5AF0 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-
-      /* Petit halo lumineux */
-      filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.3));
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Animation du logo Python IA */
-    .logo-tech {
-      width: 50px;
-      height: 50px;
-      filter: drop-shadow(0 0 8px rgba(127, 90, 240, 0.6));
-      /* Lueur violette */
-      transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* --- EFFET GLASSMORPHISM --- */
+    .glass-card {
+      background: var(--glass);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .logo-container:hover .logo-tech {
-      transform: scale(1.1) rotate(10deg);
-      /* Petit effet au survol */
+    .glass-card:hover {
+      border-color: rgba(34, 211, 238, 0.4);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
     }
 
-
-    /* Dégradé dynamique */
-    body::before {
-      content: "";
+    /* --- SYSTÈME SOLAIRE CSS (Background) --- */
+    .solar-system {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      background: linear-gradient(120deg, #7F5AF0, #22D3EE, #7F5AF0);
-      background-size: 600% 600%;
-      animation: gradient 20s ease infinite;
-      opacity: 0.15;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotateX(75deg);
+      /* Vue inclinée comme demandé */
+      width: 1000px;
+      height: 1000px;
+      z-index: -1;
+      perspective: 1000px;
     }
 
-    @keyframes gradient {
-      0% {
-        background-position: 0% 50%
-      }
-
-      50% {
-        background-position: 100% 50%
-      }
-
-      100% {
-        background-position: 0% 50%
-      }
-    }
-
-    /* Particles */
-    #particles {
+    .orbit {
       position: absolute;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      z-index: 1;
-      pointer-events: none;
+      top: 50%;
+      left: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      animation: rotate infinite linear;
     }
 
-    /* Floating illustration */
-    .float {
-      animation: float 6s ease-in-out infinite;
-    }
-
-    @keyframes float {
-
-      0%,
-      100% {
-        transform: translateY(0);
-      }
-
-      50% {
-        transform: translateY(-15px);
-      }
-    }
-
-    /* Button glow */
-    .btn-glow:hover {
-      box-shadow: 0 0 12px #22D3EE, 0 0 24px #7F5AF0;
-      transform: scale(1.05);
-    }
-
-    .transition-smooth {
-      transition: all 0.3s ease-in-out;
-    }
-
-    /* Fade-in */
-    .fade-in {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-
-    .fade-in.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* Terminal lines animation */
-    .terminal {
+    .planet {
       position: absolute;
-      top: 20%;
-      left: 5%;
-      font-family: monospace;
-      color: #22D3EE;
-      opacity: 0.08;
-      white-space: nowrap;
-      overflow: hidden;
+      top: -5px;
+      left: 50%;
+      width: 12px;
+      height: 12px;
+      background: var(--cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 15px var(--cyan);
     }
 
-    .terminal span {
-      display: inline-block;
-      animation: scrollText 10s linear infinite;
+    @keyframes rotate {
+      from {
+        transform: translate(-50%, -50%) rotate(0deg);
+      }
+
+      to {
+        transform: translate(-50%, -50%) rotate(360deg);
+      }
     }
 
-    @keyframes scrollText {
-      0% {
-        transform: translateX(100%);
-      }
+    /* --- LOGO & TEXT ANIMATION --- */
+    .text-gradient {
+      background: linear-gradient(135deg, #fff 30%, var(--cyan) 70%, var(--purple) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      /* <--- AJOUTEZ CETTE LIGNE (La propriété standard) */
+      -webkit-text-fill-color: transparent;
+    }
 
-      100% {
-        transform: translateX(-100%);
-      }
+    .btn-primary {
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      box-shadow: 0 0 20px rgba(127, 90, 240, 0.4);
+      transition: 0.3s;
+    }
+
+    .btn-primary:hover {
+      filter: brightness(1.2);
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.6);
+      transform: scale(1.02);
     }
   </style>
 </head>
 
 <body>
 
-      <canvas id="particles"></canvas>
+  <div class="solar-system">
+    <div class="orbit" style="width: 300px; height: 300px; animation-duration: 10s;">
+      <div class="planet"></div>
+    </div>
+    <div class="orbit" style="width: 500px; height: 500px; animation-duration: 25s;">
+      <div class="planet" style="background: var(--purple); box-shadow: 0 0 15px var(--purple);"></div>
+    </div>
+    <div class="orbit" style="width: 800px; height: 800px; animation-duration: 40s;">
+      <div class="planet"></div>
+    </div>
+  </div>
 
-     
+  <header class="w-full fixed top-0 left-0 z-[100] transition-all duration-300" id="main-header">
+    <div
+      class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center bg-black/20 backdrop-blur-md border-b border-white/5">
 
-      <header class="w-full relative z-50">
-    <div class="max-w-7xl mx-auto px-6 py-6 flex justify-between items-center">
-
-      <a href="index.html" class="logo-container flex items-center space-x-3 group text-decoration-none">
-
-        <svg class="logo-tech" viewBox="0 0 110 110" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <linearGradient id="cyber-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#22D3EE;stop-opacity:1" />
-              <stop offset="100%" style="stop-color:#7F5AF0;stop-opacity:1" />
-            </linearGradient>
-          </defs>
-
-          <path
-            d="M55.5 10C35 10 33 24 33 24H54V31H21C16 31 10 35 10 47C10 59 15 63 20 63H27V54C27 42 34 38 43 38H61C68 38 72 32 72 24C72 13 65 10 55.5 10ZM45 19C47 19 48 20 48 22C48 24 46 25 45 25C43 25 41 23 41 22C41 20 43 19 45 19Z"
-            fill="url(#cyber-gradient)" />
-
-          <path
-            d="M54.5 100C75 100 77 86 77 86H56V79H89C94 79 100 75 100 63C100 51 95 47 90 47H83V56C83 68 76 72 67 72H49C42 72 38 78 38 86C38 97 45 100 54.5 100ZM65 91C63 91 62 90 62 88C62 86 64 85 65 85C67 85 69 87 69 88C69 90 67 91 65 91Z"
-            fill="white" fill-opacity="0.9" />
-        </svg>
-
-        <span class="brand-text">
-          LearnPython
-        </span>
+      <a href="index.html" class="flex items-center space-x-3 group">
+        <div class="w-8 h-8 bg-gradient-to-br from-cyan-400 to-purple-600 rounded-lg flex items-center justify-center">
+          <span class="font-display text-white text-lg">P</span>
+        </div>
+        <span class="font-display text-xl tracking-tighter text-gradient">LearnPython</span>
       </a>
 
-      <nav class="hidden md:flex space-x-6 text-[#F8FAFC] font-medium items-center">
-        <a href="index.html" class="hover:text-[#22D3EE] transition">Accueil</a>
-        <a href="en_construction.html" class="hover:text-[#22D3EE] transition">Cours</a>
-        <a href="exercices.html" class="hover:text-[#22D3EE] transition">Exercices</a>
-        <a href="en_construction.html" class="hover:text-[#22D3EE] transition">Communauté</a>
-        <a href="exercices.html"
-          class="ml-4 px-6 py-2 bg-[#7F5AF0] rounded-lg font-semibold btn-glow transition-smooth text-white">Commencer</a>
+      <nav class="hidden md:flex space-x-8 items-center">
+        <a href="exercices.html" class="text-sm font-medium hover:text-cyan-400 transition">Exercices</a>
+        <a href="#" class="btn-primary px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest">Commencer</a>
       </nav>
 
-      <button id="mobile-menu-btn" class="md:hidden text-[#F8FAFC] focus:outline-none">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <button id="mobile-menu-btn" class="md:hidden text-white p-2 focus:outline-none relative z-[110]">
+        <svg id="hamburger-icon" class="w-7 h-7 transition-all duration-300" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+        <svg id="close-icon" class="w-7 h-7 hidden transition-all duration-300" fill="none" stroke="currentColor"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
     </div>
 
     <div id="mobile-menu"
-      class="hidden md:hidden absolute w-full bg-[#0F172A]/95 backdrop-blur-md border-b border-[#22D3EE]/30 top-full left-0 shadow-xl transition-all duration-300 ease-in-out">
-      <div class="flex flex-col px-6 py-4 space-y-4 font-medium text-center">
-        <a href="index.html" class="block text-[#F8FAFC] hover:text-[#22D3EE] py-2 transition">Accueil</a>
-        <a href="en_construction.html" class="block text-[#F8FAFC] hover:text-[#22D3EE] py-2 transition">Cours</a>
-        <a href="exercices.html" class="block text-[#F8FAFC] hover:text-[#22D3EE] py-2 transition">Exercices</a>
-        <a href="en_construction.html" class="block text-[#F8FAFC] hover:text-[#22D3EE] py-2 transition">Communauté</a>
-        <a href="exercices.html"
-          class="block px-6 py-3 bg-[#7F5AF0] rounded-lg font-semibold btn-glow transition-smooth text-white mx-auto w-full max-w-xs">Commencer</a>
-      </div>
+      class="hidden fixed inset-0 bg-black/95 backdrop-blur-2xl z-[105] flex flex-col items-center justify-center space-y-8 text-center px-6">
+      <a href="index.html" class="text-3xl font-display text-white hover:text-cyan-400">Accueil</a>
+      <a href="exercices.html" class="text-3xl font-display text-white hover:text-cyan-400">Exercices</a>
+      <a href="#" class="text-3xl font-display text-white hover:text-cyan-400">Cours SNT</a>
+      <div class="w-full h-px bg-white/10 max-w-[200px]"></div>
+      <a href="#" class="btn-primary w-full max-w-xs py-4 rounded-2xl font-bold text-lg">Commencer</a>
     </div>
   </header>
 
-      <section    
-    class="flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto px-6 mt-12 md:mt-20 relative z-10">
-        <div class="md:w-1/2 space-y-6">
-            <h1 class="text-4xl md:text-5xl font-bold">Apprenez Python de manière interactive</h1>
-            <p class="text-[#CBD5E1] text-lg md:text-xl">Des exercices pratiques, des défis et un apprentissage <br>
-        ludique pour maîtriser le langage Python.</p>
-            <a href="exercices.html"    
-        class="inline-block px-8 py-3 bg-[#22D3EE] rounded-lg font-semibold btn-glow transition-smooth">Commencer</a>
-          </div>
-        <div class="md:w-1/2 mt-10 md:mt-0">
-            <img         src="gem1.png"         alt="Programmation Python et IA" class="rounded-xl shadow-xl float"
-        loading="lazy">
-          </div>
-      </section>
+  <div class="h-24"></div>
 
-     
-      <footer class="mt-20 bg-[#1E293B] py-10 relative z-10">
-        <div
-      class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
-            <p class="text-[#CBD5E1]">&copy; 2025 LearnPython. Tous droits réservés.</p>
-            <div class="space-x-6">
-                <a href="en_construction.html" class="hover:text-[#22D3EE] transition">Cours</a>
-                <a href="exercices.html" class="hover:text-[#22D3EE] transition">Exercices</a>
-                <a href="en_construction.html" class="hover:text-[#22D3EE] transition">FAQ</a>
-                <a href="en_construction.html" class="hover:text-[#22D3EE] transition">Contact</a>
-              </div>
-           
-          </div>
-      </footer>
+  <main class="max-w-7xl mx-auto px-8 py-12">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-     
+      <div class="md:col-span-8 glass-card p-12 flex flex-col justify-center min-h-[450px]">
+        <span class="text-cyan-400 font-mono text-sm mb-4"># print("Hello Lycée")</span>
+        <h1 class="text-5xl md:text-7xl mb-6 leading-tight">
+          Le code est votre <br><span class="text-gradient">nouveau pouvoir.</span>
+        </h1>
+        <p class="text-slate-400 text-lg max-w-xl mb-8">
+          Maîtrisez Python avec une pédagogie conçue pour les élèves de Seconde. Interactif, visuel et gratuit.
+        </p>
+        <div class="flex space-x-4">
+          <button class="btn-primary px-10 py-4 rounded-xl font-bold">Lancer un défi</button>
+          <button
+            class="px-10 py-4 rounded-xl font-bold border border-white/10 hover:bg-white/5 transition">Explorer</button>
+        </div>
+      </div>
+
+      <div class="md:col-span-4 glass-card p-8 flex flex-col justify-between overflow-hidden relative">
+        <div class="relative z-10">
+          <h3 class="font-display text-2xl mb-2">Progression</h3>
+          <p class="text-slate-500 font-mono text-xs">Section SNT : 85% complété</p>
+        </div>
+        <div class="mt-8 relative z-10">
+          <div class="text-6xl font-display text-cyan-500">24</div>
+          <p class="text-sm uppercase tracking-widest opacity-50">Exercices validés</p>
+        </div>
+        <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-purple-600/20 blur-3xl rounded-full"></div>
+      </div>
+
+      <div class="md:col-span-5 glass-card p-6 font-mono text-sm bg-black/40">
+        <div class="flex space-x-2 mb-4">
+          <div class="w-3 h-3 rounded-full bg-red-500"></div>
+          <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+          <div class="w-3 h-3 rounded-full bg-green-500"></div>
+        </div>
+        <div class="space-y-1">
+          <p><span class="text-purple-400">def</span> <span class="text-cyan-400">calculer_orbite</span>(planete):</p>
+          <p class="pl-4 text-slate-500">""" Algorithme de Seconde """</p>
+          <p class="pl-4">vitesse = planete.masse * <span class="text-yellow-500">9.8</span></p>
+          <p class="pl-4"><span class="text-purple-400">return</span> vitesse</p>
+          <p class="mt-4 text-green-400">>>> Traitement en cours...</p>
+        </div>
+      </div>
+
+      <div class="md:col-span-7 glass-card p-8 flex items-center justify-between group cursor-pointer">
+        <div>
+          <h3 class="font-display text-2xl mb-1">Programme SNT</h3>
+          <p class="text-slate-400">Données, Réseaux, Web et Python.</p>
+        </div>
+        <div
+          class="w-16 h-16 rounded-full border border-white/10 flex items-center justify-center group-hover:border-cyan-400 transition-colors">
+          <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+          </svg>
+        </div>
+      </div>
+
+    </div>
+
+    <div
+      class="md:col-span-12 glass-card mt-6 p-8 bg-gradient-to-br from-purple-900/20 to-transparent border-purple-500/30">
+      <div class="flex flex-col md:row justify-between items-start md:items-center mb-8">
+        <div>
+          <h2 class="font-display text-3xl text-gradient">Créer un Défi Custom</h2>
+          <p class="text-slate-400 font-mono text-sm mt-1">Générez un lien et envoyez-le à un camarade pour le défier.
+          </p>
+        </div>
+        <div
+          class="px-4 py-1 bg-purple-500/20 rounded-full border border-purple-500/50 text-xs font-bold text-purple-300 mt-4 md:mt-0">
+          MODE SERVERLESS (URL-BASED)
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Titre du défi</label>
+            <input id="challenge-title" type="text" placeholder="Ex: La suite de Fibonacci"
+              class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 focus:border-cyan-400 outline-none transition">
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Instructions pour
+              l'adversaire</label>
+            <textarea id="challenge-desc" placeholder="Explique ce que le code doit faire..."
+              class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 h-32 focus:border-cyan-400 outline-none transition"></textarea>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Code de départ
+              (Python)</label>
+            <textarea id="challenge-code"
+              class="w-full bg-black/60 border border-white/10 rounded-xl px-4 py-3 h-32 font-mono text-cyan-400 focus:border-cyan-400 outline-none transition"># Écris ton code ici&#10;def solution():&#10;    pass</textarea>
+          </div>
+          <button onclick="generateChallenge()"
+            class="btn-primary w-full py-4 rounded-xl font-bold text-lg flex items-center justify-center space-x-2">
+            <span>Générer le lien de duel</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                stroke-linecap="round" stroke-linejoin="round" stroke-width="2" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div id="result-zone" class="mt-8 p-6 bg-cyan-400/10 border border-cyan-400/30 rounded-2xl hidden">
+        <p class="text-cyan-400 font-bold mb-2">Lien prêt ! Copie-le et envoie-le :</p>
+        <div class="flex space-x-2">
+          <input id="final-link" type="text" readonly
+            class="flex-1 bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-sm font-mono overflow-hidden text-ellipsis">
+          <button onclick="copyLink()"
+            class="bg-cyan-400 text-black px-6 py-2 rounded-lg font-bold hover:bg-white transition">Copier</button>
+        </div>
+      </div>
+    </div>
+
+
+  </main>
+
+  <footer class="mt-20 py-12 border-t border-white/5 bg-black/20">
+    <div class="max-w-7xl mx-auto px-8 flex flex-col md:row justify-between items-center opacity-50 text-sm">
+      <p>© 2025 LearnPython - L'éducation par le code.</p>
+      <div class="flex space-x-8 mt-4 md:mt-0">
+        <a href="#" class="hover:text-white">Mentions Légales</a>
+        <a href="#" class="hover:text-white">Contact</a>
+        <a href="#" class="hover:text-white">GitHub</a>
+      </div>
+    </div>
+  </footer>
   <script>
-    const canvas = document.getElementById('particles'); const ctx = canvas.getContext('2d'); let w = canvas.width = window.innerWidth; let h = canvas.height = window.innerHeight; const particlesArray = []; window.addEventListener('resize', () => { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }); class Particle { constructor() { this.x = Math.random() * w; this.y = Math.random() * h; this.radius = Math.random() * 2 + 1; this.speedX = (Math.random() - 0.5) * 0.2; this.speedY = (Math.random() - 0.5) * 0.2; } update() { this.x += this.speedX; this.y += this.speedY; if (this.x < 0 || this.x > w) this.speedX = -this.speedX; if (this.y < 0 || this.y > h) this.speedY = -this.speedY; } draw() { ctx.fillStyle = '#7F5AF0'; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fill(); } } for (let i = 0; i < 30; i++)particlesArray.push(new Particle()); function animate() { ctx.clearRect(0, 0, w, h); particlesArray.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animate); } animate();
-
-    // Fade-in
-    const observer = new IntersectionObserver(entries => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); } }) }, { threshold: 0.2 }); document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-    // Script pour le menu Mobile
     const btn = document.getElementById('mobile-menu-btn');
     const menu = document.getElementById('mobile-menu');
+    const hamIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('close-icon');
 
     btn.addEventListener('click', () => {
-      menu.classList.toggle('hidden');
+      const isOpened = !menu.classList.contains('hidden');
+
+      if (isOpened) {
+        // Fermeture
+        menu.classList.add('hidden');
+        hamIcon.classList.remove('hidden');
+        closeIcon.classList.add('hidden');
+        document.body.style.overflow = 'auto'; // Réactive le scroll
+      } else {
+        // Ouverture
+        menu.classList.remove('hidden');
+        hamIcon.classList.add('hidden');
+        closeIcon.classList.remove('hidden');
+        document.body.style.overflow = 'hidden'; // Bloque le scroll
+      }
     });
 
+    // Fermer le menu si on clique sur un lien
+    const menuLinks = menu.querySelectorAll('a');
+    menuLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        menu.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+      });
+    });
+
+
+    function generateChallenge() {
+      const title = document.getElementById('challenge-title').value;
+      const desc = document.getElementById('challenge-desc').value;
+      const code = document.getElementById('challenge-code').value;
+
+      // On crée un objet avec les données
+      const challengeData = {
+        t: title,
+        d: desc,
+        c: code
+      };
+
+      // Encodage en Base64 pour l'URL
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(challengeData))));
+
+      // Construction de l'URL finale (à adapter selon votre domaine)
+      const finalURL = window.location.origin + '/duel.html?challenge=' + encoded;
+
+      // Affichage du résultat
+      document.getElementById('final-link').value = finalURL;
+      document.getElementById('result-zone').classList.remove('hidden');
+    }
+
+    function copyLink() {
+      const linkInput = document.getElementById('final-link');
+      linkInput.select();
+      document.execCommand('copy');
+      alert('Lien copié ! Envoie-le à tes élèves ou tes amis.');
+    }
   </script>
 
 </body>
